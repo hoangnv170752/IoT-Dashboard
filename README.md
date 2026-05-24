@@ -1,4 +1,4 @@
-# IoT Dashboard
+# IoT Dashboard - TB Stack
 
 <p align="center">
   <img src="ui/public/iot-icon.png" alt="IoT Dashboard" width="100" height="100">
