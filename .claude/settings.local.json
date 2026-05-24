@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(New-Item -ItemType Directory -Path \"d:\\\\IoT-Dashboard\\\\android\")",
+      "PowerShell($items = @\\('app','gradle','.gradle','.idea','build.gradle.kts','settings.gradle.kts','gradle.properties','gradlew','gradlew.bat','local.properties','.gitignore'\\); foreach \\($i in $items\\) { $src = Join-Path 'd:\\\\IoT-Dashboard' $i; if \\(Test-Path $src\\) { Move-Item -Path $src -Destination 'd:\\\\IoT-Dashboard\\\\android\\\\' -Force; Write-Output \"moved: $i\" } else { Write-Output \"missing: $i\" } })",
+      "PowerShell(& 'd:\\\\IoT-Dashboard\\\\android\\\\gradlew.bat' -p 'd:\\\\IoT-Dashboard\\\\android' help --quiet 2>&1)"
+    ]
+  }
+}
