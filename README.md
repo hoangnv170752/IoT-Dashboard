@@ -44,6 +44,77 @@ idf.py menuconfig  # Configure WiFi and API URL
 idf.py build flash monitor
 ```
 
+### Android App
+```bash
+# Open the android/ folder in Android Studio (Giraffe / Hedgehog or newer, JDK 17+)
+# Edit android/.env to point at your ThingsBoard instance:
+#   BE_URL=https://demo.thingsboard.io/api
+# Then Build → Run on a device or emulator.
+```
+
+## Android Companion App
+
+The `/android` directory contains a native Kotlin app that talks to the same ThingsBoard backend as the dashboard UI and lets a phone act as a virtual IoT device for end-to-end testing.
+
+### Goal
+
+Provide a lightweight on-device client to validate the full data pipeline (login → device discovery → MQTT publish) without needing physical hardware.
+
+### What It Does
+
+- **Login** — Authenticates against `${BE_URL}/auth/login`, mirroring [ui/lib/auth.ts](ui/lib/auth.ts); persists the JWT in `SharedPreferences`.
+- **Device List** — Fetches `GET /api/tenant/deviceInfos` and lets you pick a target device.
+- **MQTT Publish** — Pulls the device's `MQTT_BASIC` credentials (clientId / userName / password), connects to `tcp://<host>:1883`, and publishes random telemetry to topic `v2/t`, equivalent to:
+
+  ```bash
+  mosquitto_pub -d -q 1 -h $BE_HOST -p 1883 -t v2/t \
+    -i $CLIENT_ID -u $USERNAME -P $PASSWORD \
+    -m '{"temperature": 25, "humidity": 100}'
+  ```
+
+### Tech Stack
+
+- Kotlin + AppCompat + RecyclerView (no Compose)
+- Coroutines + `HttpURLConnection` for REST
+- [Eclipse Paho](https://www.eclipse.org/paho/) for MQTT v3
+
+### Configuration
+
+Edit [android/.env](android/.env) — the Gradle build reads it and injects `BuildConfig.API_BASE_URL`:
+
+```dotenv
+BE_URL=https://demo.thingsboard.io/api
+```
+
+### Project Layout
+
+```
+android/
+├── .env                          # BE_URL — loaded by Gradle
+├── app/
+│   ├── build.gradle.kts          # Reads .env, sets buildConfigField
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/iot/android/
+│       │   ├── MainActivity.kt           # Login screen
+│       │   ├── DeviceListActivity.kt     # Device picker
+│       │   ├── PublishActivity.kt        # MQTT publish + random data
+│       │   └── data/
+│       │       ├── ThingsBoardApi.kt     # REST client
+│       │       ├── MqttPublisher.kt      # Paho wrapper
+│       │       ├── TokenStore.kt         # SharedPreferences token store
+│       │       └── Models.kt
+│       └── res/layout/
+├── gradle/libs.versions.toml
+└── settings.gradle.kts
+```
+
+### Requirements
+
+- Android Studio Hedgehog (2023.1) or newer
+- JDK 17 (AGP 8.8.0 requirement)
+- Android SDK 35; minSdk 24
+
 ## Firmware Framework
 
 The `/firmware` directory contains an ESP-IDF based framework for connecting ESP32 devices to the IoT Dashboard.
