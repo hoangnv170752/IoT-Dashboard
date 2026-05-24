@@ -1,0 +1,21 @@
+menu "IoT Dashboard Configuration"
+
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "YOUR_WIFI_SSID"
+        help
+            SSID (network name) to connect to.
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "YOUR_WIFI_PASSWORD"
+        help
+            WiFi password (WPA or WPA2).
+
+    config API_URL
+        string "API URL"
+        default "https://iot.eaut.edu.vn/api"
+        help
+            The IoT Dashboard API URL to ping.
+
+endmenu
