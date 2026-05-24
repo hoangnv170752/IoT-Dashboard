@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { BottomNav } from "@/components/bottom-nav";
+import { AIAssistantButton } from "@/components/ai-assistant-button";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -34,6 +35,9 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
 
       {/* Bottom navigation - only visible on mobile */}
       <BottomNav />
+
+      {/* AI Assistant floating button */}
+      <AIAssistantButton />
     </div>
   );
 }

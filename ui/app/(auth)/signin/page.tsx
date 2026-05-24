@@ -141,15 +141,15 @@ export default function SignInPage() {
               </Button>
             </form>
 
-            {/* Sign Up Link */}
+            {/* Contact Admin */}
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link
-                href="/signup"
+              <a
+                href={`mailto:admin@${process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, '').replace(/\/api$/, '') || 'example.com'}`}
                 className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
               >
-                Sign up
-              </Link>
+                Contact admin
+              </a>
             </p>
           </div>
         </div>

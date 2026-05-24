@@ -9,7 +9,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import {
   Table,
@@ -21,23 +20,22 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
-  fetchDeviceInfos,
-  fetchDeviceProfiles,
-  DeviceInfo,
-  DeviceProfile,
-} from "@/lib/device";
+  fetchAssetInfos,
+  fetchAssetProfiles,
+  AssetInfo,
+  AssetProfile,
+} from "@/lib/asset";
 
 const PAGE_SIZE = 10;
 
-export default function DevicePage() {
-  const [devices, setDevices] = useState<DeviceInfo[]>([]);
-  const [profiles, setProfiles] = useState<DeviceProfile[]>([]);
+export default function AssetsPage() {
+  const [assets, setAssets] = useState<AssetInfo[]>([]);
+  const [profiles, setProfiles] = useState<AssetProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [selectedProfile, setSelectedProfile] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
 
@@ -50,29 +48,28 @@ export default function DevicePage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const loadDevices = useCallback(async () => {
+  const loadAssets = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetchDeviceInfos({
+      const response = await fetchAssetInfos({
         pageSize: PAGE_SIZE,
         page: currentPage,
-        active: selectedStatus === "all" ? undefined : selectedStatus === "online",
-        deviceProfileId: selectedProfile === "all" ? undefined : selectedProfile,
+        assetProfileId: selectedProfile === "all" ? undefined : selectedProfile,
         textSearch: debouncedSearch || undefined,
       });
-      setDevices(response.data);
+      setAssets(response.data);
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
     } catch (error) {
-      console.error("Failed to load devices:", error);
+      console.error("Failed to load assets:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, selectedProfile, selectedStatus, debouncedSearch]);
+  }, [currentPage, selectedProfile, debouncedSearch]);
 
   const loadProfiles = useCallback(async () => {
     try {
-      const response = await fetchDeviceProfiles({ pageSize: 100 });
+      const response = await fetchAssetProfiles({ pageSize: 100 });
       setProfiles(response.data);
     } catch (error) {
       console.error("Failed to load profiles:", error);
@@ -84,16 +81,11 @@ export default function DevicePage() {
   }, [loadProfiles]);
 
   useEffect(() => {
-    loadDevices();
-  }, [loadDevices]);
+    loadAssets();
+  }, [loadAssets]);
 
   const handleProfileChange = (value: string) => {
     setSelectedProfile(value);
-    setCurrentPage(0);
-  };
-
-  const handleStatusChange = (value: string) => {
-    setSelectedStatus(value);
     setCurrentPage(0);
   };
 
@@ -113,11 +105,6 @@ export default function DevicePage() {
     return profile?.name || "Select Profile";
   };
 
-  const getSelectedStatusName = () => {
-    if (selectedStatus === "all") return "All Status";
-    return selectedStatus === "online" ? "Online" : "Offline";
-  };
-
   return (
     <div className="p-4 md:p-6">
       <div className="flex flex-col gap-6">
@@ -125,10 +112,10 @@ export default function DevicePage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">
-              Devices
+              Assets
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage and monitor your IoT devices ({totalElements} devices)
+              Manage and monitor your IoT assets ({totalElements} assets)
             </p>
           </div>
         </div>
@@ -158,17 +145,6 @@ export default function DevicePage() {
               ))}
             </SelectContent>
           </Select>
-
-          <Select value={selectedStatus} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-full sm:w-[150px]">
-              <span>{getSelectedStatusName()}</span>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="offline">Offline</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Table */}
@@ -177,9 +153,9 @@ export default function DevicePage() {
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : devices.length === 0 ? (
+          ) : assets.length === 0 ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
-              No devices found
+              No assets found
             </div>
           ) : (
             <Table>
@@ -187,35 +163,26 @@ export default function DevicePage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead className="hidden sm:table-cell">Label</TableHead>
-                  <TableHead className="hidden md:table-cell">Profile</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
+                  <TableHead>Profile</TableHead>
                   <TableHead className="hidden lg:table-cell">Created</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {devices.map((device) => (
-                  <TableRow key={device.id.id}>
-                    <TableCell className="font-medium">{device.name}</TableCell>
+                {assets.map((asset) => (
+                  <TableRow key={asset.id.id}>
+                    <TableCell className="font-medium">{asset.name}</TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground">
-                      {device.label || "-"}
+                      {asset.label || "-"}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant="secondary">{device.deviceProfileName}</Badge>
+                      <Badge variant="outline">{asset.type}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={device.active ? "default" : "outline"}
-                        className={
-                          device.active
-                            ? "bg-green-500/10 text-green-600 hover:bg-green-500/20"
-                            : "text-muted-foreground"
-                        }
-                      >
-                        {device.active ? "Online" : "Offline"}
-                      </Badge>
+                      <Badge variant="secondary">{asset.assetProfileName}</Badge>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-muted-foreground">
-                      {formatDate(device.createdTime)}
+                      {formatDate(asset.createdTime)}
                     </TableCell>
                   </TableRow>
                 ))}

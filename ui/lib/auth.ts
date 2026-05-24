@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://iot.eaut.edu.vn/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export interface AuthTokens {
   token: string;

@@ -1,115 +1,321 @@
-import { Cpu, Activity, Wifi, AlertTriangle } from "lucide-react";
+"use client";
 
-const stats = [
-  {
-    title: "Total Devices",
-    value: "24",
-    change: "+2 from last week",
-    icon: Cpu,
-    color: "text-blue-500",
-    bgColor: "bg-blue-500/10",
-  },
-  {
-    title: "Online",
-    value: "18",
-    change: "75% of devices",
-    icon: Wifi,
-    color: "text-green-500",
-    bgColor: "bg-green-500/10",
-  },
-  {
-    title: "Data Points",
-    value: "12.5K",
-    change: "+15% from yesterday",
-    icon: Activity,
-    color: "text-purple-500",
-    bgColor: "bg-purple-500/10",
-  },
-  {
-    title: "Alerts",
-    value: "3",
-    change: "2 critical",
-    icon: AlertTriangle,
-    color: "text-orange-500",
-    bgColor: "bg-orange-500/10",
-  },
+import { useEffect, useState } from "react";
+import { Cpu, Wifi, WifiOff, Box, Loader2 } from "lucide-react";
+import { Bar, BarChart, XAxis, YAxis, Cell } from "recharts";
+import {
+  getDeviceCounts,
+  getDeviceCountsByProfile,
+  DeviceCountByProfile,
+} from "@/lib/device";
+import {
+  getAssetCount,
+  getAssetCountsByProfile,
+  AssetCountByProfile,
+} from "@/lib/asset";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+
+interface DeviceStats {
+  online: number;
+  offline: number;
+  total: number;
+}
+
+const COLORS = [
+  "#3b82f6", // blue
+  "#22c55e", // green
+  "#f59e0b", // amber
+  "#ef4444", // red
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#f97316", // orange
+  "#14b8a6", // teal
+  "#a855f7", // purple
+  "#eab308", // yellow
+  "#6366f1", // indigo
 ];
 
-const recentActivity = [
-  { device: "Temperature Sensor", event: "Reading: 24.5°C", time: "2 min ago" },
-  { device: "Motion Detector", event: "Motion detected", time: "5 min ago" },
-  { device: "Humidity Sensor", event: "Reading: 65%", time: "8 min ago" },
-  { device: "Smart Light", event: "Turned off", time: "15 min ago" },
-  { device: "Door Lock", event: "Locked", time: "20 min ago" },
+const ASSET_COLORS = [
+  "#6366f1", // indigo
+  "#14b8a6", // teal
+  "#f97316", // orange
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#22c55e", // green
+  "#3b82f6", // blue
+  "#ef4444", // red
+  "#eab308", // yellow
+  "#06b6d4", // cyan
+  "#a855f7", // purple
+  "#f59e0b", // amber
 ];
 
 export default function Home() {
+  const [stats, setStats] = useState<DeviceStats | null>(null);
+  const [profileCounts, setProfileCounts] = useState<DeviceCountByProfile[]>([]);
+  const [assetCount, setAssetCount] = useState<number>(0);
+  const [assetProfileCounts, setAssetProfileCounts] = useState<AssetCountByProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const [counts, profileData, totalAssets, assetProfiles] = await Promise.all([
+          getDeviceCounts(),
+          getDeviceCountsByProfile(),
+          getAssetCount(),
+          getAssetCountsByProfile(),
+        ]);
+        setStats(counts);
+        setProfileCounts(profileData);
+        setAssetCount(totalAssets);
+        setAssetProfileCounts(assetProfiles);
+      } catch (error) {
+        console.error("Failed to load stats:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadStats();
+  }, []);
+
+  const statCards = [
+    {
+      title: "Total Devices",
+      value: stats?.total ?? 0,
+      subtitle: "All registered devices",
+      icon: Cpu,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+    },
+    {
+      title: "Online",
+      value: stats?.online ?? 0,
+      subtitle: stats
+        ? `${Math.round((stats.online / (stats.total || 1)) * 100)}% of devices`
+        : "0% of devices",
+      icon: Wifi,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+    },
+    {
+      title: "Offline",
+      value: stats?.offline ?? 0,
+      subtitle: stats
+        ? `${Math.round((stats.offline / (stats.total || 1)) * 100)}% of devices`
+        : "0% of devices",
+      icon: WifiOff,
+      color: "text-red-500",
+      bgColor: "bg-red-500/10",
+    },
+    {
+      title: "Total Assets",
+      value: assetCount,
+      subtitle: "All registered assets",
+      icon: Box,
+      color: "text-indigo-500",
+      bgColor: "bg-indigo-500/10",
+    },
+  ];
+
+  // Prepare device chart data
+  const deviceBarChartData = profileCounts.map((item, index) => ({
+    name: item.profileName,
+    value: item.count,
+    fill: COLORS[index % COLORS.length],
+  }));
+
+  // Prepare asset chart data
+  const assetBarChartData = assetProfileCounts.map((item, index) => ({
+    name: item.profileName,
+    value: item.count,
+    fill: ASSET_COLORS[index % ASSET_COLORS.length],
+  }));
+
+  // Generate chart configs dynamically
+  const deviceChartConfig: ChartConfig = profileCounts.reduce(
+    (acc, item, index) => ({
+      ...acc,
+      [item.profileName]: {
+        label: item.profileName,
+        color: COLORS[index % COLORS.length],
+      },
+    }),
+    { value: { label: "Devices" } } as ChartConfig
+  );
+
+  const assetChartConfig: ChartConfig = assetProfileCounts.reduce(
+    (acc, item, index) => ({
+      ...acc,
+      [item.profileName]: {
+        label: item.profileName,
+        color: ASSET_COLORS[index % ASSET_COLORS.length],
+      },
+    }),
+    { value: { label: "Assets" } } as ChartConfig
+  );
+
   return (
     <div className="p-4 md:p-6">
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         {/* Header */}
         <div>
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">
             Dashboard
           </h1>
           <p className="text-sm text-muted-foreground">
-            Overview of your IoT devices and activity
+            Overview of your IoT devices and assets
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.title}
-                className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </span>
-                  <div className={`rounded-lg p-2 ${stat.bgColor}`}>
-                    <Icon className={`h-4 w-4 ${stat.color}`} />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+              {statCards.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div
+                    key={stat.title}
+                    className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {stat.title}
+                      </span>
+                      <div className={`rounded-md p-1.5 ${stat.bgColor}`}>
+                        <Icon className={`h-3.5 w-3.5 ${stat.color}`} />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xl font-bold text-foreground">
+                        {stat.value}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {stat.subtitle}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.change}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
 
-        {/* Recent Activity */}
-        <div className="rounded-lg border border-border bg-card">
-          <div className="border-b border-border px-4 py-3">
-            <h2 className="font-semibold text-foreground">Recent Activity</h2>
-          </div>
-          <div className="divide-y divide-border">
-            {recentActivity.map((activity, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                    <Cpu className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {activity.device}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{activity.event}</p>
-                  </div>
-                </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+            {/* Charts - 2 columns */}
+            <div className="grid gap-4 lg:grid-cols-2">
+              {/* Device Bar Chart */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Devices by Profile</CardTitle>
+                  <CardDescription className="text-xs">
+                    Number of devices in each profile type
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {profileCounts.length > 0 ? (
+                    <ChartContainer
+                      config={deviceChartConfig}
+                      className="h-[220px] w-full"
+                    >
+                      <BarChart
+                        data={deviceBarChartData}
+                        layout="vertical"
+                        margin={{ left: 0, right: 16 }}
+                      >
+                        <XAxis type="number" hide />
+                        <YAxis
+                          dataKey="name"
+                          type="category"
+                          tickLine={false}
+                          axisLine={false}
+                          width={100}
+                          tick={{ fontSize: 11 }}
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        <Bar dataKey="value" radius={4}>
+                          {deviceBarChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  ) : (
+                    <div className="flex h-[220px] items-center justify-center text-muted-foreground">
+                      No data available
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Asset Bar Chart */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Assets by Profile</CardTitle>
+                  <CardDescription className="text-xs">
+                    Number of assets in each profile type
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {assetProfileCounts.length > 0 ? (
+                    <ChartContainer
+                      config={assetChartConfig}
+                      className="h-[220px] w-full"
+                    >
+                      <BarChart
+                        data={assetBarChartData}
+                        layout="vertical"
+                        margin={{ left: 0, right: 16 }}
+                      >
+                        <XAxis type="number" hide />
+                        <YAxis
+                          dataKey="name"
+                          type="category"
+                          tickLine={false}
+                          axisLine={false}
+                          width={100}
+                          tick={{ fontSize: 11 }}
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        <Bar dataKey="value" radius={4}>
+                          {assetBarChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  ) : (
+                    <div className="flex h-[220px] items-center justify-center text-muted-foreground">
+                      No data available
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

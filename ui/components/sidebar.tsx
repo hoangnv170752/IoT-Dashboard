@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Cpu, Settings } from "lucide-react";
+import { LayoutDashboard, Cpu, Box, Settings } from "lucide-react";
 
 interface NavItem {
   title: string;
@@ -18,12 +19,17 @@ const navItems: NavItem[] = [
     icon: <LayoutDashboard className="h-4 w-4" />,
   },
   {
-    title: "Device",
+    title: "Devices",
     href: "/device",
     icon: <Cpu className="h-4 w-4" />,
   },
   {
-    title: "Setting",
+    title: "Assets",
+    href: "/assets",
+    icon: <Box className="h-4 w-4" />,
+  },
+  {
+    title: "Settings",
     href: "/setting",
     icon: <Settings className="h-4 w-4" />,
   },
@@ -75,9 +81,13 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
           collapsed ? "justify-center px-2" : "px-4"
         )}
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm">
-          IoT
-        </div>
+        <Image
+          src="/iot-icon.png"
+          alt="IoT"
+          width={32}
+          height={32}
+          className="rounded-md"
+        />
         {!collapsed && (
           <span className="font-semibold text-foreground">IoT Dashboard</span>
         )}

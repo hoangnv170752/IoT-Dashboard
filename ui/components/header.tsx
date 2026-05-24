@@ -14,6 +14,11 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { toast } from "sonner";
+
+const showComingSoon = () => {
+  toast.info("Coming soon!");
+};
 
 interface HeaderProps {
   title?: string;
@@ -79,6 +84,7 @@ export function Header({
           variant="ghost"
           size="sm"
           className="hidden gap-2 text-muted-foreground sm:flex"
+          onClick={showComingSoon}
         >
           <MessageSquare className="h-4 w-4" />
           <span className="hidden lg:inline">Feedback</span>
@@ -88,6 +94,7 @@ export function Header({
           variant="ghost"
           size="sm"
           className="hidden gap-2 text-muted-foreground sm:flex"
+          onClick={showComingSoon}
         >
           <FileText className="h-4 w-4" />
           <span className="hidden lg:inline">Docs</span>
@@ -97,6 +104,7 @@ export function Header({
           variant="ghost"
           size="sm"
           className="hidden gap-2 text-muted-foreground sm:flex"
+          onClick={showComingSoon}
         >
           <Sparkles className="h-4 w-4" />
           <span className="hidden lg:inline">Ask</span>
@@ -108,6 +116,7 @@ export function Header({
           variant="ghost"
           size="icon"
           className="hidden h-8 w-8 text-muted-foreground sm:flex"
+          onClick={showComingSoon}
         >
           <CreditCard className="h-4 w-4" />
         </Button>
@@ -116,6 +125,7 @@ export function Header({
           variant="ghost"
           size="icon"
           className="h-8 w-8 text-muted-foreground"
+          onClick={showComingSoon}
         >
           <Bell className="h-4 w-4" />
         </Button>

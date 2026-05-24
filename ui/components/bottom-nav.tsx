@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Cpu, Settings } from "lucide-react";
+import { LayoutDashboard, Cpu, Box, Settings } from "lucide-react";
 
 interface NavItem {
   title: string;
@@ -18,12 +18,17 @@ const bottomNavItems: NavItem[] = [
     icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
-    title: "Device",
+    title: "Devices",
     href: "/device",
     icon: <Cpu className="h-5 w-5" />,
   },
   {
-    title: "Setting",
+    title: "Assets",
+    href: "/assets",
+    icon: <Box className="h-5 w-5" />,
+  },
+  {
+    title: "Settings",
     href: "/setting",
     icon: <Settings className="h-5 w-5" />,
   },
