@@ -84,9 +84,11 @@ export default function AssetsPage() {
     loadAssets();
   }, [loadAssets]);
 
-  const handleProfileChange = (value: string) => {
-    setSelectedProfile(value);
-    setCurrentPage(0);
+  const handleProfileChange = (value: string | null) => {
+    if (value) {
+      setSelectedProfile(value);
+      setCurrentPage(0);
+    }
   };
 
   const formatDate = (timestamp: number) => {
