@@ -27,6 +27,7 @@ A unified platform for monitoring industrial automation systems and managing con
 
 ## Quick Start
 
+### Dashboard UI
 ```bash
 cd ui
 npm install
@@ -35,6 +36,46 @@ npm run dev
 ```
 
 See [ui/README.md](ui/README.md) for detailed technical documentation.
+
+### Firmware
+```bash
+cd firmware
+idf.py menuconfig  # Configure WiFi and API URL
+idf.py build flash monitor
+```
+
+## Firmware Framework
+
+The `/firmware` directory contains an ESP-IDF based framework for connecting ESP32 devices to the IoT Dashboard.
+
+### Goal
+
+Build a reusable, production-ready firmware foundation for ESP-based IoT devices that enables:
+
+- **Plug & Play Connectivity** - Any ESP32/ESP8266 device can connect to the dashboard with minimal configuration
+- **Standardized Communication** - HTTP/HTTPS API integration with the ThingsBoard backend
+- **Easy Configuration** - WiFi credentials and API endpoints configurable via `menuconfig`
+- **Extensible Architecture** - Base framework for adding sensors, actuators, and custom telemetry
+
+### Supported Devices
+
+- ESP32 (all variants)
+- ESP32-S2, ESP32-S3, ESP32-C3
+- ESP8266 (with modifications)
+
+### Configuration
+
+Edit via `idf.py menuconfig` → IoT Dashboard Configuration:
+- WiFi SSID & Password
+- API URL endpoint
+
+### Use Cases
+
+- Environmental monitoring (temperature, humidity, air quality)
+- Industrial sensor data collection
+- Asset tracking and location
+- Machine status reporting
+- Energy monitoring
 
 ## License
 
