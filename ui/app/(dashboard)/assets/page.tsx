@@ -38,6 +38,8 @@ import {
   AssetInfo,
   AssetProfile,
 } from "@/lib/asset";
+import { fetchAttributes, AttributeValue } from "@/lib/telemetry";
+import { AttributesSection } from "@/components/attributes-section";
 
 const PAGE_SIZE = 10;
 
@@ -85,6 +87,9 @@ export default function AssetsPage() {
   const [editLabel, setEditLabel] = useState("");
   const [editProfileId, setEditProfileId] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [attributes, setAttributes] = useState<AttributeValue[] | null>(null);
+  const [isLoadingAttributes, setIsLoadingAttributes] = useState(false);
+  const [attributesError, setAttributesError] = useState<string | null>(null);
 
   // Debounce search input
   useEffect(() => {
@@ -172,6 +177,9 @@ export default function AssetsPage() {
     setDetailError(null);
     setDetail(null);
     setIsEditing(false);
+    setAttributes(null);
+    setAttributesError(null);
+    setIsLoadingAttributes(true);
     try {
       const info = await fetchAssetById(assetId);
       setDetail(info);
@@ -186,6 +194,18 @@ export default function AssetsPage() {
       );
     } finally {
       setIsLoadingDetail(false);
+    }
+
+    try {
+      const attrs = await fetchAttributes("ASSET", assetId, "SERVER_SCOPE");
+      setAttributes(attrs);
+    } catch (error) {
+      console.error("Failed to load attributes:", error);
+      setAttributesError(
+        error instanceof Error ? error.message : "Failed to load attributes"
+      );
+    } finally {
+      setIsLoadingAttributes(false);
     }
   };
 
@@ -533,6 +553,13 @@ export default function AssetsPage() {
                       </div>
                     </div>
                   )}
+
+                  <AttributesSection
+                    title="Server attributes"
+                    isLoading={isLoadingAttributes}
+                    error={attributesError}
+                    attributes={attributes}
+                  />
 
                   <div className="flex items-center justify-end pt-2">
                     <Button size="sm" onClick={handleStartEdit}>

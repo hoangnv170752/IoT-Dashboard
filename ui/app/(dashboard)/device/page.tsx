@@ -42,6 +42,8 @@ import {
   DeviceCredentialsType,
   CreateDevicePayload,
 } from "@/lib/device";
+import { fetchAttributes, AttributeValue } from "@/lib/telemetry";
+import { AttributesSection } from "@/components/attributes-section";
 
 const PAGE_SIZE = 10;
 
@@ -149,6 +151,9 @@ export default function DevicePage() {
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [attributes, setAttributes] = useState<AttributeValue[] | null>(null);
+  const [isLoadingAttributes, setIsLoadingAttributes] = useState(false);
+  const [attributesError, setAttributesError] = useState<string | null>(null);
 
   // Add device state
   const [addOpen, setAddOpen] = useState(false);
@@ -255,6 +260,9 @@ export default function DevicePage() {
     setDetail(null);
     setCredentials(null);
     setCopiedKey(null);
+    setAttributes(null);
+    setAttributesError(null);
+    setIsLoadingAttributes(true);
     try {
       const [info, creds] = await Promise.all([
         fetchDeviceById(deviceId),
@@ -269,6 +277,18 @@ export default function DevicePage() {
       );
     } finally {
       setIsLoadingDetail(false);
+    }
+
+    try {
+      const attrs = await fetchAttributes("DEVICE", deviceId, "SERVER_SCOPE");
+      setAttributes(attrs);
+    } catch (error) {
+      console.error("Failed to load attributes:", error);
+      setAttributesError(
+        error instanceof Error ? error.message : "Failed to load attributes"
+      );
+    } finally {
+      setIsLoadingAttributes(false);
     }
   };
 
@@ -651,6 +671,13 @@ export default function DevicePage() {
                     </div>
                   )}
                 </div>
+
+                <AttributesSection
+                  title="Server attributes"
+                  isLoading={isLoadingAttributes}
+                  error={attributesError}
+                  attributes={attributes}
+                />
               </div>
             ) : null}
           </DialogContent>
