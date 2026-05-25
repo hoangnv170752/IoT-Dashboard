@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, ChevronLeft, ChevronRight, Search, Plus, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
