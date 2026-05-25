@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">IoT Dashboard</string>
+
+    <string name="title_login">Sign in</string>
+    <string name="title_devices">Devices</string>
+    <string name="title_publish">Publish telemetry</string>
+
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="action_login">Login</string>
+    <string name="action_logout">Logout</string>
+    <string name="action_publish_random">Publish random values</string>
+    <string name="action_refresh">Refresh</string>
+
+    <string name="default_username">tenant@thingsboard.org</string>
+    <string name="default_password">tenant</string>
+
+    <string name="msg_logging_in">Signing in…</string>
+    <string name="msg_loading_devices">Loading devices…</string>
+    <string name="msg_loading_credentials">Loading device credentials…</string>
+    <string name="msg_no_devices">No devices found</string>
+    <string name="msg_publishing">Publishing…</string>
+
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
+
+    <string name="action_start_stream">Start streaming</string>
+    <string name="action_stop_stream">Stop streaming</string>
+    <string name="hint_interval_seconds">Interval (seconds)</string>
+    <string name="default_interval_seconds">3</string>
+</resources>

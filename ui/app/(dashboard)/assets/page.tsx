@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
-import { Loader2, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useEffect, useState, useCallback, type ReactNode } from "react";
+import { Loader2, ChevronLeft, ChevronRight, Search, Plus, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,13 +21,44 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import {
   fetchAssetInfos,
   fetchAssetProfiles,
+  createAsset,
+  fetchAssetById,
+  updateAsset,
   AssetInfo,
   AssetProfile,
 } from "@/lib/asset";
+import { fetchAttributes, AttributeValue } from "@/lib/telemetry";
+import { AttributesSection } from "@/components/attributes-section";
 
 const PAGE_SIZE = 10;
+
+function DetailRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-xs uppercase tracking-wide text-muted-foreground">
+        {label}
+      </span>
+      <span className="text-sm">{value}</span>
+    </div>
+  );
+}
 
 export default function AssetsPage() {
   const t = useTranslations();
@@ -41,6 +71,26 @@ export default function AssetsPage() {
   const [selectedProfile, setSelectedProfile] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+
+  const [addOpen, setAddOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formName, setFormName] = useState("");
+  const [formLabel, setFormLabel] = useState("");
+  const [formProfileId, setFormProfileId] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detail, setDetail] = useState<AssetInfo | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editLabel, setEditLabel] = useState("");
+  const [editProfileId, setEditProfileId] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [attributes, setAttributes] = useState<AttributeValue[] | null>(null);
+  const [isLoadingAttributes, setIsLoadingAttributes] = useState(false);
+  const [attributesError, setAttributesError] = useState<string | null>(null);
 
   // Debounce search input
   useEffect(() => {
@@ -110,6 +160,162 @@ export default function AssetsPage() {
     return profile?.name || t("assets.profile");
   };
 
+  const resetAddForm = () => {
+    setFormName("");
+    setFormLabel("");
+    setFormProfileId("");
+    setFormDescription("");
+  };
+
+  const handleAddOpenChange = (open: boolean) => {
+    setAddOpen(open);
+    if (!open) resetAddForm();
+  };
+
+  const handleRowClick = async (assetId: string) => {
+    setDetailOpen(true);
+    setIsLoadingDetail(true);
+    setDetailError(null);
+    setDetail(null);
+    setIsEditing(false);
+    setAttributes(null);
+    setAttributesError(null);
+    setIsLoadingAttributes(true);
+    try {
+      const info = await fetchAssetById(assetId);
+      setDetail(info);
+      setEditName(info.name);
+      setEditLabel(info.label || "");
+      setEditProfileId(info.assetProfileId.id);
+      setEditDescription(info.additionalInfo?.description || "");
+    } catch (error) {
+      console.error("Failed to load asset detail:", error);
+      setDetailError(
+        error instanceof Error ? error.message : "Failed to load asset"
+      );
+    } finally {
+      setIsLoadingDetail(false);
+    }
+
+    try {
+      const attrs = await fetchAttributes("ASSET", assetId, "SERVER_SCOPE");
+      setAttributes(attrs);
+    } catch (error) {
+      console.error("Failed to load attributes:", error);
+      setAttributesError(
+        error instanceof Error ? error.message : "Failed to load attributes"
+      );
+    } finally {
+      setIsLoadingAttributes(false);
+    }
+  };
+
+  const handleDetailOpenChange = (open: boolean) => {
+    setDetailOpen(open);
+    if (!open) {
+      setIsEditing(false);
+      setDetail(null);
+      setDetailError(null);
+    }
+  };
+
+  const handleStartEdit = () => {
+    if (!detail) return;
+    setEditName(detail.name);
+    setEditLabel(detail.label || "");
+    setEditProfileId(detail.assetProfileId.id);
+    setEditDescription(detail.additionalInfo?.description || "");
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!detail) return;
+    if (!editName.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    if (!editProfileId) {
+      toast.error("Asset profile is required");
+      return;
+    }
+
+    const profile = profiles.find((p) => p.id.id === editProfileId);
+    const profileChanged = editProfileId !== detail.assetProfileId.id;
+
+    setIsSubmitting(true);
+    try {
+      const updated = await updateAsset({
+        ...detail,
+        name: editName.trim(),
+        label: editLabel.trim() || null,
+        type: profileChanged && profile ? profile.name : detail.type,
+        assetProfileId: {
+          entityType: "ASSET_PROFILE",
+          id: editProfileId,
+        },
+        additionalInfo: {
+          ...(detail.additionalInfo || {}),
+          description: editDescription.trim(),
+        },
+      });
+      setDetail(updated);
+      setIsEditing(false);
+      toast.success(`Asset "${updated.name}" updated`);
+      loadAssets();
+    } catch (error) {
+      console.error("Failed to update asset:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update asset"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmitNewAsset = async () => {
+    if (!formName.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    if (!formProfileId) {
+      toast.error("Asset profile is required");
+      return;
+    }
+
+    const profile = profiles.find((p) => p.id.id === formProfileId);
+
+    setIsSubmitting(true);
+    try {
+      const created = await createAsset({
+        name: formName.trim(),
+        label: formLabel.trim(),
+        type: profile?.name,
+        assetProfileId: {
+          entityType: "ASSET_PROFILE",
+          id: formProfileId,
+        },
+        additionalInfo: {
+          description: formDescription.trim(),
+        },
+        customerId: null,
+      });
+      toast.success(`Asset "${created.name}" created`);
+      handleAddOpenChange(false);
+      loadAssets();
+    } catch (error) {
+      console.error("Failed to create asset:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create asset"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6">
       <div className="flex flex-col gap-6">
@@ -123,6 +329,10 @@ export default function AssetsPage() {
               {t("assets.description")} ({totalElements} {t("assets.title").toLowerCase()})
             </p>
           </div>
+          <Button onClick={() => setAddOpen(true)} size="sm">
+            <Plus className="h-4 w-4" />
+            Add Asset
+          </Button>
         </div>
 
         {/* Filters */}
@@ -175,7 +385,11 @@ export default function AssetsPage() {
               </TableHeader>
               <TableBody>
                 {assets.map((asset) => (
-                  <TableRow key={asset.id.id}>
+                  <TableRow
+                    key={asset.id.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleRowClick(asset.id.id)}
+                  >
                     <TableCell className="font-medium">{asset.name}</TableCell>
                     <TableCell className="hidden sm:table-cell text-muted-foreground">
                       {asset.label || "-"}
@@ -195,6 +409,263 @@ export default function AssetsPage() {
             </Table>
           )}
         </div>
+
+        {/* Asset Detail / Edit Dialog */}
+        <Dialog open={detailOpen} onOpenChange={handleDetailOpenChange}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {isEditing
+                  ? "Edit asset"
+                  : detail?.name || (isLoadingDetail ? "Loading..." : "Asset")}
+              </DialogTitle>
+              <DialogDescription>
+                {isEditing
+                  ? "Update asset information"
+                  : "Asset information"}
+              </DialogDescription>
+            </DialogHeader>
+
+            {isLoadingDetail ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : detailError ? (
+              <div className="py-4 text-sm text-destructive">{detailError}</div>
+            ) : detail ? (
+              isEditing ? (
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="edit-asset-name">
+                      Name <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="edit-asset-name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="edit-asset-label">Label</Label>
+                    <Input
+                      id="edit-asset-label"
+                      value={editLabel}
+                      onChange={(e) => setEditLabel(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <Label>
+                      Asset profile <span className="text-destructive">*</span>
+                    </Label>
+                    <Select
+                      value={editProfileId || undefined}
+                      onValueChange={(v) => v && setEditProfileId(v)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <span className="truncate">
+                          {profiles.find((p) => p.id.id === editProfileId)
+                            ?.name || "Select profile"}
+                        </span>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {profiles.map((profile) => (
+                          <SelectItem key={profile.id.id} value={profile.id.id}>
+                            {profile.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="edit-asset-description">Description</Label>
+                    <Input
+                      id="edit-asset-description"
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancelEdit}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSaveEdit}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Save"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <DetailRow label="Name" value={detail.name} />
+                    <DetailRow label="Type" value={detail.type} />
+                    <DetailRow label="Label" value={detail.label || "-"} />
+                    <DetailRow
+                      label="Profile"
+                      value={
+                        <Badge variant="secondary">
+                          {detail.assetProfileName}
+                        </Badge>
+                      }
+                    />
+                    <DetailRow
+                      label="Created"
+                      value={formatDate(detail.createdTime)}
+                    />
+                    <DetailRow
+                      label="Version"
+                      value={detail.version?.toString() ?? "-"}
+                    />
+                  </div>
+
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                      Asset ID
+                    </div>
+                    <div className="font-mono text-xs break-all rounded-md bg-muted px-2 py-1.5">
+                      {detail.id.id}
+                    </div>
+                  </div>
+
+                  {detail.additionalInfo?.description && (
+                    <div>
+                      <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                        Description
+                      </div>
+                      <div className="text-sm">
+                        {detail.additionalInfo.description}
+                      </div>
+                    </div>
+                  )}
+
+                  <AttributesSection
+                    title="Server attributes"
+                    isLoading={isLoadingAttributes}
+                    error={attributesError}
+                    attributes={attributes}
+                  />
+
+                  <div className="flex items-center justify-end pt-2">
+                    <Button size="sm" onClick={handleStartEdit}>
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              )
+            ) : null}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Asset Dialog */}
+        <Dialog open={addOpen} onOpenChange={handleAddOpenChange}>
+          <DialogContent className="max-w-xl">
+            <DialogHeader>
+              <DialogTitle>Add new asset</DialogTitle>
+              <DialogDescription>
+                Create a new asset under an asset profile
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="asset-name">
+                  Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="asset-name"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="My asset"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="asset-label">Label</Label>
+                <Input
+                  id="asset-label"
+                  value={formLabel}
+                  onChange={(e) => setFormLabel(e.target.value)}
+                  placeholder="Optional label"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label>
+                  Asset profile <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={formProfileId || undefined}
+                  onValueChange={(v) => v && setFormProfileId(v)}
+                >
+                  <SelectTrigger className="w-full">
+                    <span className="truncate">
+                      {profiles.find((p) => p.id.id === formProfileId)?.name ||
+                        "Select profile"}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {profiles.map((profile) => (
+                      <SelectItem key={profile.id.id} value={profile.id.id}>
+                        {profile.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="asset-description">Description</Label>
+                <Input
+                  id="asset-description"
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  placeholder="Optional description"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleAddOpenChange(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSubmitNewAsset}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Add"
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Pagination */}
         {totalPages > 1 && (

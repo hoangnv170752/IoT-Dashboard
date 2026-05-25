@@ -16,6 +16,12 @@ export interface AssetInfo {
   label: string | null;
   assetProfileId: AssetId;
   assetProfileName: string;
+  tenantId?: AssetId;
+  customerId?: AssetId | null;
+  externalId?: AssetId | null;
+  version?: number;
+  customerTitle?: string | null;
+  customerIsPublic?: boolean;
   additionalInfo?: {
     description?: string;
   } | null;
@@ -41,6 +47,90 @@ export interface AssetProfileResponse {
   totalPages: number;
   totalElements: number;
   hasNext: boolean;
+}
+
+export interface CreateAssetPayload {
+  name: string;
+  label?: string;
+  type?: string;
+  assetProfileId: AssetId;
+  additionalInfo?: {
+    description?: string;
+  };
+  customerId?: AssetId | null;
+}
+
+// Create a new asset
+export async function createAsset(payload: CreateAssetPayload): Promise<AssetInfo> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No authentication token");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/asset`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "X-Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(text || "Failed to create asset");
+  }
+
+  return response.json();
+}
+
+// Fetch a single asset by ID (full info)
+export async function fetchAssetById(assetId: string): Promise<AssetInfo> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No authentication token");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/asset/info/${assetId}`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "X-Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch asset");
+  }
+
+  return response.json();
+}
+
+// Update an existing asset. The full asset object (with id and version)
+// must be sent — ThingsBoard reuses POST /api/asset for both create and update.
+export async function updateAsset(payload: AssetInfo): Promise<AssetInfo> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No authentication token");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/asset`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "X-Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(text || "Failed to update asset");
+  }
+
+  return response.json();
 }
 
 // Fetch asset infos with optional filters

@@ -17,10 +17,33 @@ export interface DeviceInfo {
   active: boolean;
   deviceProfileId: DeviceId;
   deviceProfileName: string;
+  tenantId?: DeviceId;
+  customerId?: DeviceId;
+  firmwareId?: DeviceId | null;
+  softwareId?: DeviceId | null;
+  externalId?: DeviceId | null;
+  version?: number;
+  customerTitle?: string | null;
+  customerIsPublic?: boolean;
   additionalInfo?: {
     gateway?: boolean;
+    overwriteActivityTime?: boolean;
     description?: string;
   };
+  deviceData?: {
+    configuration?: { type: string };
+    transportConfiguration?: { type: string };
+  };
+}
+
+export interface DeviceCredentials {
+  id: { id: string };
+  createdTime: number;
+  deviceId: DeviceId;
+  credentialsType: string;
+  credentialsId: string;
+  credentialsValue: string | null;
+  version: number;
 }
 
 export interface DeviceInfoResponse {
@@ -92,6 +115,103 @@ export async function fetchDeviceInfos(options: {
 
   if (!response.ok) {
     throw new Error("Failed to fetch device infos");
+  }
+
+  return response.json();
+}
+
+export type DeviceCredentialsType = "ACCESS_TOKEN" | "X509_CERTIFICATE" | "MQTT_BASIC";
+
+export interface CreateDevicePayload {
+  device: {
+    name: string;
+    label?: string;
+    deviceProfileId: DeviceId;
+    additionalInfo?: {
+      gateway?: boolean;
+      overwriteActivityTime?: boolean;
+      description?: string;
+    };
+    customerId?: DeviceId | null;
+  };
+  credentials?: {
+    credentialsType: DeviceCredentialsType;
+    credentialsId: string | null;
+    credentialsValue: string | null;
+  };
+}
+
+// Create a new device with optional credentials
+export async function createDeviceWithCredentials(
+  payload: CreateDevicePayload
+): Promise<DeviceInfo> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No authentication token");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/device-with-credentials`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "X-Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(text || "Failed to create device");
+  }
+
+  return response.json();
+}
+
+// Fetch a single device by ID
+export async function fetchDeviceById(deviceId: string): Promise<DeviceInfo> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No authentication token");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/device/info/${deviceId}`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "X-Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch device");
+  }
+
+  return response.json();
+}
+
+// Fetch device credentials by device ID
+export async function fetchDeviceCredentials(
+  deviceId: string
+): Promise<DeviceCredentials> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No authentication token");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/device/${deviceId}/credentials`,
+    {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "X-Authorization": `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch device credentials");
   }
 
   return response.json();
