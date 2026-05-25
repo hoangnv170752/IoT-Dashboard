@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import {
   Table,
@@ -31,6 +31,7 @@ import {
 const PAGE_SIZE = 10;
 
 export default function DevicePage() {
+  const t = useTranslations();
   const [devices, setDevices] = useState<DeviceInfo[]>([]);
   const [profiles, setProfiles] = useState<DeviceProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,14 +114,14 @@ export default function DevicePage() {
   };
 
   const getSelectedProfileName = () => {
-    if (selectedProfile === "all") return "All Profiles";
+    if (selectedProfile === "all") return t("devices.allProfiles");
     const profile = profiles.find((p) => p.id.id === selectedProfile);
-    return profile?.name || "Select Profile";
+    return profile?.name || t("devices.profile");
   };
 
   const getSelectedStatusName = () => {
-    if (selectedStatus === "all") return "All Status";
-    return selectedStatus === "online" ? "Online" : "Offline";
+    if (selectedStatus === "all") return t("devices.allStatus");
+    return selectedStatus === "online" ? t("common.online") : t("common.offline");
   };
 
   return (
@@ -130,10 +131,10 @@ export default function DevicePage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">
-              Devices
+              {t("devices.title")}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage and monitor your IoT devices ({totalElements} devices)
+              {t("devices.description")} ({totalElements} {t("devices.title").toLowerCase()})
             </p>
           </div>
         </div>
@@ -143,7 +144,7 @@ export default function DevicePage() {
           <div className="relative flex-1 sm:max-w-[300px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by name..."
+              placeholder={t("common.searchByName")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -155,7 +156,7 @@ export default function DevicePage() {
               <span className="truncate">{getSelectedProfileName()}</span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Profiles</SelectItem>
+              <SelectItem value="all">{t("devices.allProfiles")}</SelectItem>
               {profiles.map((profile) => (
                 <SelectItem key={profile.id.id} value={profile.id.id}>
                   {profile.name}
@@ -169,9 +170,9 @@ export default function DevicePage() {
               <span>{getSelectedStatusName()}</span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="online">Online</SelectItem>
-              <SelectItem value="offline">Offline</SelectItem>
+              <SelectItem value="all">{t("devices.allStatus")}</SelectItem>
+              <SelectItem value="online">{t("common.online")}</SelectItem>
+              <SelectItem value="offline">{t("common.offline")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -184,17 +185,17 @@ export default function DevicePage() {
             </div>
           ) : devices.length === 0 ? (
             <div className="flex items-center justify-center py-12 text-muted-foreground">
-              No devices found
+              {t("devices.noDevices")}
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="hidden sm:table-cell">Label</TableHead>
-                  <TableHead className="hidden md:table-cell">Profile</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="hidden lg:table-cell">Created</TableHead>
+                  <TableHead>{t("devices.name")}</TableHead>
+                  <TableHead className="hidden sm:table-cell">{t("devices.label")}</TableHead>
+                  <TableHead className="hidden md:table-cell">{t("devices.profile")}</TableHead>
+                  <TableHead>{t("devices.status")}</TableHead>
+                  <TableHead className="hidden lg:table-cell">{t("devices.created")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -216,7 +217,7 @@ export default function DevicePage() {
                             : "text-muted-foreground"
                         }
                       >
-                        {device.active ? "Online" : "Offline"}
+                        {device.active ? t("common.online") : t("common.offline")}
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-muted-foreground">
@@ -233,7 +234,7 @@ export default function DevicePage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Page {currentPage + 1} of {totalPages}
+              {t("common.page")} {currentPage + 1} {t("common.of")} {totalPages}
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -243,7 +244,7 @@ export default function DevicePage() {
                 disabled={currentPage === 0 || isLoading}
               >
                 <ChevronLeft className="h-4 w-4" />
-                Previous
+                {t("common.previous")}
               </Button>
               <Button
                 variant="outline"
@@ -253,7 +254,7 @@ export default function DevicePage() {
                 }
                 disabled={currentPage >= totalPages - 1 || isLoading}
               >
-                Next
+                {t("common.next")}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

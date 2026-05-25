@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Cpu, Wifi, WifiOff, Box, Loader2 } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis, Cell } from "recharts";
 import {
@@ -64,6 +65,7 @@ const ASSET_COLORS = [
 ];
 
 export default function Home() {
+  const t = useTranslations();
   const [stats, setStats] = useState<DeviceStats | null>(null);
   const [profileCounts, setProfileCounts] = useState<DeviceCountByProfile[]>([]);
   const [assetCount, setAssetCount] = useState<number>(0);
@@ -95,42 +97,48 @@ export default function Home() {
 
   const statCards = [
     {
-      title: "Total Devices",
+      title: t("dashboard.totalDevices"),
       value: stats?.total ?? 0,
-      subtitle: "All registered devices",
+      subtitleKey: "allDevices",
       icon: Cpu,
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
     },
     {
-      title: "Online",
+      title: t("common.online"),
       value: stats?.online ?? 0,
-      subtitle: stats
-        ? `${Math.round((stats.online / (stats.total || 1)) * 100)}% of devices`
-        : "0% of devices",
+      subtitleKey: "onlinePercent",
       icon: Wifi,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
     },
     {
-      title: "Offline",
+      title: t("common.offline"),
       value: stats?.offline ?? 0,
-      subtitle: stats
-        ? `${Math.round((stats.offline / (stats.total || 1)) * 100)}% of devices`
-        : "0% of devices",
+      subtitleKey: "offlinePercent",
       icon: WifiOff,
       color: "text-red-500",
       bgColor: "bg-red-500/10",
     },
     {
-      title: "Total Assets",
+      title: t("dashboard.totalAssets"),
       value: assetCount,
-      subtitle: "All registered assets",
+      subtitleKey: "allAssets",
       icon: Box,
       color: "text-indigo-500",
       bgColor: "bg-indigo-500/10",
     },
   ];
+
+  const getSubtitle = (key: string) => {
+    if (key === "onlinePercent" && stats) {
+      return `${Math.round((stats.online / (stats.total || 1)) * 100)}%`;
+    }
+    if (key === "offlinePercent" && stats) {
+      return `${Math.round((stats.offline / (stats.total || 1)) * 100)}%`;
+    }
+    return "";
+  };
 
   // Prepare device chart data
   const deviceBarChartData = profileCounts.map((item, index) => ({
@@ -175,10 +183,10 @@ export default function Home() {
         {/* Header */}
         <div>
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">
-            Dashboard
+            {t("dashboard.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Overview of your IoT devices and assets
+            {t("dashboard.overview")}
           </p>
         </div>
 
@@ -210,7 +218,7 @@ export default function Home() {
                         {stat.value}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {stat.subtitle}
+                        {getSubtitle(stat.subtitleKey)}
                       </p>
                     </div>
                   </div>
@@ -223,9 +231,9 @@ export default function Home() {
               {/* Device Bar Chart */}
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Devices by Profile</CardTitle>
+                  <CardTitle className="text-base">{t("dashboard.devicesByProfile")}</CardTitle>
                   <CardDescription className="text-xs">
-                    Number of devices in each profile type
+                    {t("dashboard.devicesByProfileDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -261,7 +269,7 @@ export default function Home() {
                     </ChartContainer>
                   ) : (
                     <div className="flex h-[220px] items-center justify-center text-muted-foreground">
-                      No data available
+                      {t("common.noData")}
                     </div>
                   )}
                 </CardContent>
@@ -270,9 +278,9 @@ export default function Home() {
               {/* Asset Bar Chart */}
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Assets by Profile</CardTitle>
+                  <CardTitle className="text-base">{t("dashboard.assetsByProfile")}</CardTitle>
                   <CardDescription className="text-xs">
-                    Number of assets in each profile type
+                    {t("dashboard.assetsByProfileDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -308,7 +316,7 @@ export default function Home() {
                     </ChartContainer>
                   ) : (
                     <div className="flex h-[220px] items-center justify-center text-muted-foreground">
-                      No data available
+                      {t("common.noData")}
                     </div>
                   )}
                 </CardContent>

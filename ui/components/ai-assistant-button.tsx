@@ -1,23 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export function AIAssistantButton() {
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
-  >([
-    {
-      role: "assistant",
-      content:
-        "Hello! I'm your IoT Assistant. Ask me anything about your devices, sensors, or dashboard features.",
-    },
-  ]);
+  >([]);
+
+  // Initialize messages with translation on mount
+  useEffect(() => {
+    setMessages([
+      {
+        role: "assistant",
+        content: t("assistant.greeting"),
+      },
+    ]);
+  }, [t]);
 
   const handleSend = async () => {
     if (!message.trim() || isLoading) return;
@@ -33,8 +39,7 @@ export function AIAssistantButton() {
         ...prev,
         {
           role: "assistant",
-          content:
-            "This feature is coming soon! I'll be able to help you with device monitoring, data analysis, and troubleshooting your IoT devices.",
+          content: t("assistant.comingSoonResponse"),
         },
       ]);
       setIsLoading(false);
@@ -66,7 +71,7 @@ export function AIAssistantButton() {
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary-foreground" />
               <span className="font-semibold text-primary-foreground">
-                IoT Assistant
+                {t("assistant.title")}
               </span>
             </div>
             <Button
@@ -118,7 +123,7 @@ export function AIAssistantButton() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask about your IoT devices..."
+                placeholder={t("assistant.placeholder")}
                 className="flex-1 bg-muted rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
               />
               <Button

@@ -2,33 +2,34 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, Cpu, Box, Settings } from "lucide-react";
 
 interface NavItem {
-  title: string;
+  titleKey: string;
   href: string;
   icon: React.ReactNode;
 }
 
 const bottomNavItems: NavItem[] = [
   {
-    title: "Dashboard",
+    titleKey: "nav.dashboard",
     href: "/",
     icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
-    title: "Devices",
+    titleKey: "nav.devices",
     href: "/device",
     icon: <Cpu className="h-5 w-5" />,
   },
   {
-    title: "Assets",
+    titleKey: "nav.assets",
     href: "/assets",
     icon: <Box className="h-5 w-5" />,
   },
   {
-    title: "Settings",
+    titleKey: "nav.settings",
     href: "/setting",
     icon: <Settings className="h-5 w-5" />,
   },
@@ -36,6 +37,7 @@ const bottomNavItems: NavItem[] = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const t = useTranslations();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background md:hidden">
@@ -61,7 +63,7 @@ export function BottomNav() {
               >
                 {item.icon}
               </span>
-              <span>{item.title}</span>
+              <span>{t(item.titleKey)}</span>
             </Link>
           );
         })}

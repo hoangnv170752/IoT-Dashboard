@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,7 @@ const suggestions = [
 export default function SignInPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const t = useTranslations();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,14 +83,14 @@ export default function SignInPage() {
           <div className="w-full max-w-sm">
             <div className="mb-8">
               <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-                Sign in with Thingsboard account
+                {t("auth.signInTitle")}
               </h1>
             </div>
 
             {/* Email/Password Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -102,7 +104,7 @@ export default function SignInPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -133,22 +135,22 @@ export default function SignInPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    {t("auth.signingIn")}
                   </>
                 ) : (
-                  "Sign In"
+                  t("auth.signIn")
                 )}
               </Button>
             </form>
 
             {/* Contact Admin */}
             <p className="mt-6 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
+              {t("common.dontHaveAccount")}{" "}
               <a
                 href={`mailto:admin@${process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, '').replace(/\/api$/, '') || 'example.com'}`}
                 className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
               >
-                Contact admin
+                {t("common.contactAdmin")}
               </a>
             </p>
           </div>
@@ -156,13 +158,13 @@ export default function SignInPage() {
 
         {/* Footer */}
         <div className="text-xs text-muted-foreground">
-          By signing in, you agree to our{" "}
+          {t("auth.termsText")}{" "}
           <Link href="/terms" className="underline underline-offset-2">
-            Terms of Service
+            {t("auth.termsOfService")}
           </Link>{" "}
-          and{" "}
+          {t("auth.and")}{" "}
           <Link href="/privacy" className="underline underline-offset-2">
-            Privacy Policy
+            {t("auth.privacyPolicy")}
           </Link>
           .
         </div>

@@ -3,33 +3,34 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, Cpu, Box, Settings } from "lucide-react";
 
 interface NavItem {
-  title: string;
+  titleKey: string;
   href: string;
   icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
   {
-    title: "Dashboard",
+    titleKey: "nav.dashboard",
     href: "/",
     icon: <LayoutDashboard className="h-4 w-4" />,
   },
   {
-    title: "Devices",
+    titleKey: "nav.devices",
     href: "/device",
     icon: <Cpu className="h-4 w-4" />,
   },
   {
-    title: "Assets",
+    titleKey: "nav.assets",
     href: "/assets",
     icon: <Box className="h-4 w-4" />,
   },
   {
-    title: "Settings",
+    titleKey: "nav.settings",
     href: "/setting",
     icon: <Settings className="h-4 w-4" />,
   },
@@ -38,16 +39,17 @@ const navItems: NavItem[] = [
 interface NavLinkProps {
   item: NavItem;
   collapsed?: boolean;
+  title: string;
 }
 
-function NavLink({ item, collapsed }: NavLinkProps) {
+function NavLink({ item, collapsed, title }: NavLinkProps) {
   const pathname = usePathname();
   const isActive = pathname === item.href;
 
   return (
     <Link
       href={item.href}
-      title={collapsed ? item.title : undefined}
+      title={collapsed ? title : undefined}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
         isActive
@@ -57,7 +59,7 @@ function NavLink({ item, collapsed }: NavLinkProps) {
       )}
     >
       {item.icon}
-      {!collapsed && <span>{item.title}</span>}
+      {!collapsed && <span>{title}</span>}
     </Link>
   );
 }
@@ -67,6 +69,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed = false }: SidebarProps) {
+  const t = useTranslations();
+
   return (
     <aside
       className={cn(
@@ -101,7 +105,12 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         )}
       >
         {navItems.map((item) => (
-          <NavLink key={item.href} item={item} collapsed={collapsed} />
+          <NavLink
+            key={item.href}
+            item={item}
+            collapsed={collapsed}
+            title={t(item.titleKey)}
+          />
         ))}
       </nav>
     </aside>

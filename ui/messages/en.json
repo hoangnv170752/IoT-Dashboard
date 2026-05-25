@@ -1,0 +1,121 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search",
+    "searchByName": "Search by name...",
+    "noResults": "No results found",
+    "noData": "No data available",
+    "page": "Page",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next",
+    "all": "All",
+    "online": "Online",
+    "offline": "Offline",
+    "comingSoon": "Coming soon!",
+    "type": "Type",
+    "contactAdmin": "Contact admin",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "devices": "Devices",
+    "assets": "Assets",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "feedback": "Feedback",
+    "docs": "Docs",
+    "ask": "Ask"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signInTitle": "Sign in with Thingsboard account",
+    "signInDescription": "Enter your credentials to access the IoT Dashboard",
+    "email": "Email",
+    "password": "Password",
+    "signingIn": "Signing in...",
+    "signInWithGoogle": "Sign in with Google",
+    "termsText": "By signing in, you agree to our",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcomeBack": "Welcome back",
+    "overview": "Overview of your IoT devices and assets",
+    "totalDevices": "Total Devices",
+    "activeDevices": "Active Devices",
+    "totalAssets": "Total Assets",
+    "alerts": "Alerts",
+    "deviceStatus": "Device Status",
+    "recentActivity": "Recent Activity",
+    "devicesByProfile": "Devices by Profile",
+    "devicesByProfileDesc": "Number of devices in each profile type",
+    "assetsByProfile": "Assets by Profile",
+    "assetsByProfileDesc": "Number of assets in each profile type"
+  },
+  "devices": {
+    "title": "Devices",
+    "description": "Manage and monitor your IoT devices",
+    "devicesCount": "{count} devices",
+    "name": "Name",
+    "label": "Label",
+    "profile": "Profile",
+    "status": "Status",
+    "created": "Created",
+    "allProfiles": "All Profiles",
+    "allStatus": "All Status",
+    "noDevices": "No devices found"
+  },
+  "assets": {
+    "title": "Assets",
+    "description": "Manage and track your assets",
+    "assetsCount": "{count} assets",
+    "name": "Name",
+    "label": "Label",
+    "profile": "Profile",
+    "created": "Created",
+    "allProfiles": "All Profiles",
+    "noAssets": "No assets found"
+  },
+  "assistant": {
+    "title": "IoT Assistant",
+    "greeting": "Hello! I'm your IoT Assistant. Ask me anything about your devices, sensors, or dashboard features.",
+    "placeholder": "Ask about your IoT devices...",
+    "comingSoonResponse": "This feature is coming soon! I'll be able to help you with device monitoring, data analysis, and troubleshooting your IoT devices."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your profile and preferences",
+    "editProfile": "Edit Profile",
+    "profile": {
+      "title": "Profile",
+      "description": "Manage your account settings"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Configure notification preferences"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Password and authentication"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize the dashboard look"
+    },
+    "language": {
+      "title": "Language & Region",
+      "description": "Set your language and timezone",
+      "selectLanguage": "Select Language",
+      "english": "English",
+      "chinese": "Chinese (Simplified)",
+      "french": "French",
+      "spanish": "Spanish"
+    }
+  }
+}

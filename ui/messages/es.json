@@ -1,0 +1,121 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "search": "Buscar",
+    "searchByName": "Buscar por nombre...",
+    "noResults": "No se encontraron resultados",
+    "noData": "No hay datos disponibles",
+    "page": "Página",
+    "of": "de",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "all": "Todos",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "comingSoon": "¡Próximamente!",
+    "type": "Tipo",
+    "contactAdmin": "Contactar admin",
+    "dontHaveAccount": "¿No tienes cuenta?"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "devices": "Dispositivos",
+    "assets": "Activos",
+    "settings": "Configuración",
+    "signOut": "Cerrar sesión",
+    "feedback": "Comentarios",
+    "docs": "Documentación",
+    "ask": "Preguntar"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signInTitle": "Inicia sesión con tu cuenta de Thingsboard",
+    "signInDescription": "Ingresa tus credenciales para acceder al panel de IoT",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "signingIn": "Iniciando sesión...",
+    "signInWithGoogle": "Iniciar sesión con Google",
+    "termsText": "Al iniciar sesión, aceptas nuestros",
+    "termsOfService": "Términos de servicio",
+    "and": "y",
+    "privacyPolicy": "Política de privacidad"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "welcomeBack": "Bienvenido de nuevo",
+    "overview": "Resumen de tus dispositivos y activos IoT",
+    "totalDevices": "Total de dispositivos",
+    "activeDevices": "Dispositivos activos",
+    "totalAssets": "Total de activos",
+    "alerts": "Alertas",
+    "deviceStatus": "Estado de dispositivos",
+    "recentActivity": "Actividad reciente",
+    "devicesByProfile": "Dispositivos por perfil",
+    "devicesByProfileDesc": "Número de dispositivos en cada tipo de perfil",
+    "assetsByProfile": "Activos por perfil",
+    "assetsByProfileDesc": "Número de activos en cada tipo de perfil"
+  },
+  "devices": {
+    "title": "Dispositivos",
+    "description": "Gestiona y monitorea tus dispositivos IoT",
+    "devicesCount": "{count} dispositivos",
+    "name": "Nombre",
+    "label": "Etiqueta",
+    "profile": "Perfil",
+    "status": "Estado",
+    "created": "Creado",
+    "allProfiles": "Todos los perfiles",
+    "allStatus": "Todos los estados",
+    "noDevices": "No se encontraron dispositivos"
+  },
+  "assets": {
+    "title": "Activos",
+    "description": "Gestiona y rastrea tus activos",
+    "assetsCount": "{count} activos",
+    "name": "Nombre",
+    "label": "Etiqueta",
+    "profile": "Perfil",
+    "created": "Creado",
+    "allProfiles": "Todos los perfiles",
+    "noAssets": "No se encontraron activos"
+  },
+  "assistant": {
+    "title": "Asistente IoT",
+    "greeting": "¡Hola! Soy tu asistente IoT. Pregúntame cualquier cosa sobre tus dispositivos, sensores o funciones del panel.",
+    "placeholder": "Pregunta sobre tus dispositivos IoT...",
+    "comingSoonResponse": "¡Esta función estará disponible pronto! Podré ayudarte con el monitoreo de dispositivos, análisis de datos y solución de problemas de tus dispositivos IoT."
+  },
+  "settings": {
+    "title": "Configuración",
+    "description": "Gestiona tu perfil y preferencias",
+    "editProfile": "Editar perfil",
+    "profile": {
+      "title": "Perfil",
+      "description": "Gestiona la configuración de tu cuenta"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "description": "Configura las preferencias de notificación"
+    },
+    "security": {
+      "title": "Seguridad",
+      "description": "Contraseña y autenticación"
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "description": "Personaliza el aspecto del panel"
+    },
+    "language": {
+      "title": "Idioma y región",
+      "description": "Configura tu idioma y zona horaria",
+      "selectLanguage": "Seleccionar idioma",
+      "english": "Inglés",
+      "chinese": "Chino (simplificado)",
+      "french": "Francés",
+      "spanish": "Español"
+    }
+  }
+}

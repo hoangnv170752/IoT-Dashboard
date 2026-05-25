@@ -15,10 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
-
-const showComingSoon = () => {
-  toast.info("Coming soon!");
-};
+import { useTranslations } from "next-intl";
 
 interface HeaderProps {
   title?: string;
@@ -33,7 +30,12 @@ export function Header({
   sidebarOpen,
   onToggleSidebar,
 }: HeaderProps) {
+  const t = useTranslations();
   const { user, logout } = useAuth();
+
+  const showComingSoon = () => {
+    toast.info(t("common.comingSoon"));
+  };
 
   // Get initials from email or name
   const getInitials = () => {
@@ -87,7 +89,7 @@ export function Header({
           onClick={showComingSoon}
         >
           <MessageSquare className="h-4 w-4" />
-          <span className="hidden lg:inline">Feedback</span>
+          <span className="hidden lg:inline">{t("nav.feedback")}</span>
         </Button>
 
         <Button
@@ -97,7 +99,7 @@ export function Header({
           onClick={showComingSoon}
         >
           <FileText className="h-4 w-4" />
-          <span className="hidden lg:inline">Docs</span>
+          <span className="hidden lg:inline">{t("nav.docs")}</span>
         </Button>
 
         <Button
@@ -107,7 +109,7 @@ export function Header({
           onClick={showComingSoon}
         >
           <Sparkles className="h-4 w-4" />
-          <span className="hidden lg:inline">Ask</span>
+          <span className="hidden lg:inline">{t("nav.ask")}</span>
         </Button>
 
         <div className="mx-2 hidden h-6 w-px bg-border sm:block" />
@@ -150,7 +152,7 @@ export function Header({
               size="icon"
               className="h-8 w-8 text-muted-foreground"
               onClick={logout}
-              title="Sign out"
+              title={t("nav.signOut")}
             >
               <LogOut className="h-4 w-4" />
             </Button>

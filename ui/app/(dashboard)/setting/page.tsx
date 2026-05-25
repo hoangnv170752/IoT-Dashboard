@@ -1,46 +1,43 @@
 "use client";
 
 import { User, Bell, Shield, Palette, Globe } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 
-const settingSections = [
-  {
-    title: "Profile",
-    description: "Manage your account settings",
-    icon: User,
-    href: "/setting/profile",
-  },
-  {
-    title: "Notifications",
-    description: "Configure notification preferences",
-    icon: Bell,
-    href: "/setting/notifications",
-  },
-  {
-    title: "Security",
-    description: "Password and authentication",
-    icon: Shield,
-    href: "/setting/security",
-  },
-  {
-    title: "Appearance",
-    description: "Customize the dashboard look",
-    icon: Palette,
-    href: "/setting/appearance",
-  },
-  {
-    title: "Language & Region",
-    description: "Set your language and timezone",
-    icon: Globe,
-    href: "/setting/language",
-  },
-];
-
 export default function SettingPage() {
   const { user } = useAuth();
+  const t = useTranslations();
+
+  const settingSections = [
+    {
+      key: "profile",
+      title: t("settings.profile.title"),
+      description: t("settings.profile.description"),
+      icon: User,
+    },
+    {
+      key: "notifications",
+      title: t("settings.notifications.title"),
+      description: t("settings.notifications.description"),
+      icon: Bell,
+    },
+    {
+      key: "security",
+      title: t("settings.security.title"),
+      description: t("settings.security.description"),
+      icon: Shield,
+    },
+    {
+      key: "appearance",
+      title: t("settings.appearance.title"),
+      description: t("settings.appearance.description"),
+      icon: Palette,
+    },
+  ];
 
   // Get initials from email or name
   const getInitials = () => {
@@ -63,7 +60,7 @@ export default function SettingPage() {
       : user?.email || "Guest";
 
   const handleComingSoon = () => {
-    toast.info("Coming soon!");
+    toast.info(t("common.comingSoon"));
   };
 
   return (
@@ -72,10 +69,10 @@ export default function SettingPage() {
         {/* Header */}
         <div>
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight text-foreground">
-            Settings
+            {t("settings.title")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Manage your profile and preferences
+            {t("settings.description")}
           </p>
         </div>
 
@@ -94,8 +91,26 @@ export default function SettingPage() {
             </div>
           </div>
           <Button variant="outline" onClick={handleComingSoon}>
-            Edit Profile
+            {t("settings.editProfile")}
           </Button>
+        </div>
+
+        {/* Language Selection Card */}
+        <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
+              <Globe className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">
+                {t("settings.language.title")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t("settings.language.description")}
+              </p>
+            </div>
+          </div>
+          <LanguageSwitcher />
         </div>
 
         {/* Setting Sections - Grid Layout */}
@@ -104,7 +119,7 @@ export default function SettingPage() {
             const Icon = section.icon;
             return (
               <button
-                key={section.title}
+                key={section.key}
                 onClick={handleComingSoon}
                 className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-6 text-center transition-colors hover:bg-accent"
               >

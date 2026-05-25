@@ -1,0 +1,121 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "save": "保存",
+    "cancel": "取消",
+    "search": "搜索",
+    "searchByName": "按名称搜索...",
+    "noResults": "未找到结果",
+    "noData": "暂无数据",
+    "page": "第",
+    "of": "共",
+    "previous": "上一页",
+    "next": "下一页",
+    "all": "全部",
+    "online": "在线",
+    "offline": "离线",
+    "comingSoon": "即将推出！",
+    "type": "类型",
+    "contactAdmin": "联系管理员",
+    "dontHaveAccount": "没有账户？"
+  },
+  "nav": {
+    "dashboard": "仪表盘",
+    "devices": "设备",
+    "assets": "资产",
+    "settings": "设置",
+    "signOut": "退出登录",
+    "feedback": "反馈",
+    "docs": "文档",
+    "ask": "询问"
+  },
+  "auth": {
+    "signIn": "登录",
+    "signInTitle": "使用 Thingsboard 账户登录",
+    "signInDescription": "输入您的凭据以访问物联网仪表盘",
+    "email": "邮箱",
+    "password": "密码",
+    "signingIn": "登录中...",
+    "signInWithGoogle": "使用 Google 登录",
+    "termsText": "登录即表示您同意我们的",
+    "termsOfService": "服务条款",
+    "and": "和",
+    "privacyPolicy": "隐私政策"
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "welcomeBack": "欢迎回来",
+    "overview": "物联网设备和资产概览",
+    "totalDevices": "设备总数",
+    "activeDevices": "活跃设备",
+    "totalAssets": "资产总数",
+    "alerts": "警报",
+    "deviceStatus": "设备状态",
+    "recentActivity": "最近活动",
+    "devicesByProfile": "按配置文件分类的设备",
+    "devicesByProfileDesc": "每种配置文件类型的设备数量",
+    "assetsByProfile": "按配置文件分类的资产",
+    "assetsByProfileDesc": "每种配置文件类型的资产数量"
+  },
+  "devices": {
+    "title": "设备",
+    "description": "管理和监控您的物联网设备",
+    "devicesCount": "{count} 个设备",
+    "name": "名称",
+    "label": "标签",
+    "profile": "配置文件",
+    "status": "状态",
+    "created": "创建时间",
+    "allProfiles": "所有配置文件",
+    "allStatus": "所有状态",
+    "noDevices": "未找到设备"
+  },
+  "assets": {
+    "title": "资产",
+    "description": "管理和跟踪您的资产",
+    "assetsCount": "{count} 个资产",
+    "name": "名称",
+    "label": "标签",
+    "profile": "配置文件",
+    "created": "创建时间",
+    "allProfiles": "所有配置文件",
+    "noAssets": "未找到资产"
+  },
+  "assistant": {
+    "title": "物联网助手",
+    "greeting": "你好！我是你的物联网助手。你可以问我任何关于设备、传感器或仪表盘功能的问题。",
+    "placeholder": "询问关于您的物联网设备...",
+    "comingSoonResponse": "此功能即将推出！届时我将能够帮助您进行设备监控、数据分析和物联网设备故障排除。"
+  },
+  "settings": {
+    "title": "设置",
+    "description": "管理您的个人资料和偏好设置",
+    "editProfile": "编辑资料",
+    "profile": {
+      "title": "个人资料",
+      "description": "管理您的账户设置"
+    },
+    "notifications": {
+      "title": "通知",
+      "description": "配置通知偏好"
+    },
+    "security": {
+      "title": "安全",
+      "description": "密码和身份验证"
+    },
+    "appearance": {
+      "title": "外观",
+      "description": "自定义仪表盘外观"
+    },
+    "language": {
+      "title": "语言和地区",
+      "description": "设置您的语言和时区",
+      "selectLanguage": "选择语言",
+      "english": "英语",
+      "chinese": "简体中文",
+      "french": "法语",
+      "spanish": "西班牙语"
+    }
+  }
+}
