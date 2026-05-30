@@ -21,6 +21,7 @@
     "dontHaveAccount": "Don't have an account?"
   },
   "nav": {
+    "iot": "IoT Platform",
     "dashboard": "Dashboard",
     "devices": "Devices",
     "assets": "Assets",
@@ -28,7 +29,17 @@
     "signOut": "Sign out",
     "feedback": "Feedback",
     "docs": "Docs",
-    "ask": "Ask"
+    "ask": "Ask",
+    "crm": {
+      "title": "CRM",
+      "dashboard": "Dashboard",
+      "companies": "Companies",
+      "contacts": "Contacts",
+      "deals": "Deals",
+      "vendors": "Vendors",
+      "contracts": "Contracts",
+      "tickets": "Tickets"
+    }
   },
   "auth": {
     "signIn": "Sign In",
@@ -41,7 +52,9 @@
     "termsText": "By signing in, you agree to our",
     "termsOfService": "Terms of Service",
     "and": "and",
-    "privacyPolicy": "Privacy Policy"
+    "privacyPolicy": "Privacy Policy",
+    "crmLogin": "CRM Admin Login",
+    "iotLogin": "IoT Platform Login"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -116,6 +129,167 @@
       "chinese": "Chinese (Simplified)",
       "french": "French",
       "spanish": "Spanish"
+    }
+  },
+  "crm": {
+    "dashboard": {
+      "title": "CRM Dashboard",
+      "description": "Overview of your customer relationships",
+      "totalCompanies": "Total Companies",
+      "totalContacts": "Total Contacts",
+      "totalDeals": "Total Deals",
+      "dealValue": "Deal Value",
+      "openTickets": "Open Tickets",
+      "activeContracts": "Active Contracts",
+      "dealsByStage": "Deals by Stage",
+      "recentActivity": "Recent Activity"
+    },
+    "companies": {
+      "title": "Companies",
+      "description": "Manage your business customers",
+      "addCompany": "Add Company",
+      "editCompany": "Edit Company",
+      "deleteCompany": "Delete Company",
+      "name": "Company Name",
+      "industry": "Industry",
+      "website": "Website",
+      "phone": "Phone",
+      "address": "Address",
+      "size": "Size",
+      "noCompanies": "No companies found",
+      "sizes": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large",
+        "enterprise": "Enterprise"
+      }
+    },
+    "contacts": {
+      "title": "Contacts",
+      "description": "Manage your business contacts",
+      "addContact": "Add Contact",
+      "editContact": "Edit Contact",
+      "deleteContact": "Delete Contact",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "position": "Position",
+      "company": "Company",
+      "notes": "Notes",
+      "noContacts": "No contacts found"
+    },
+    "deals": {
+      "title": "Deals",
+      "description": "Track your sales pipeline",
+      "addDeal": "Add Deal",
+      "editDeal": "Edit Deal",
+      "deleteDeal": "Delete Deal",
+      "dealTitle": "Title",
+      "value": "Value",
+      "stage": "Stage",
+      "probability": "Probability",
+      "expectedClose": "Expected Close",
+      "contact": "Contact",
+      "company": "Company",
+      "noDeals": "No deals found",
+      "stages": {
+        "lead": "Lead",
+        "qualified": "Qualified",
+        "proposal": "Proposal",
+        "negotiation": "Negotiation",
+        "closed_won": "Closed Won",
+        "closed_lost": "Closed Lost"
+      }
+    },
+    "vendors": {
+      "title": "Vendors",
+      "description": "Manage your suppliers and partners",
+      "addVendor": "Add Vendor",
+      "editVendor": "Edit Vendor",
+      "deleteVendor": "Delete Vendor",
+      "name": "Vendor Name",
+      "code": "Code",
+      "type": "Type",
+      "email": "Email",
+      "phone": "Phone",
+      "website": "Website",
+      "address": "Address",
+      "country": "Country",
+      "rating": "Rating",
+      "status": "Status",
+      "noVendors": "No vendors found",
+      "types": {
+        "supplier": "Supplier",
+        "manufacturer": "Manufacturer",
+        "distributor": "Distributor",
+        "service_provider": "Service Provider"
+      },
+      "statuses": {
+        "pending": "Pending",
+        "active": "Active",
+        "inactive": "Inactive",
+        "blacklisted": "Blacklisted"
+      }
+    },
+    "contracts": {
+      "title": "Contracts",
+      "description": "Manage your business agreements",
+      "addContract": "Add Contract",
+      "editContract": "Edit Contract",
+      "deleteContract": "Delete Contract",
+      "contractNumber": "Contract Number",
+      "contractTitle": "Title",
+      "type": "Type",
+      "vendor": "Vendor",
+      "company": "Company",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "value": "Value",
+      "status": "Status",
+      "noContracts": "No contracts found",
+      "types": {
+        "purchase": "Purchase",
+        "sales": "Sales",
+        "service": "Service",
+        "maintenance": "Maintenance",
+        "subscription": "Subscription",
+        "nda": "NDA",
+        "partnership": "Partnership"
+      },
+      "statuses": {
+        "draft": "Draft",
+        "pending_approval": "Pending Approval",
+        "active": "Active",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      }
+    },
+    "tickets": {
+      "title": "Service Tickets",
+      "description": "Manage customer support requests",
+      "addTicket": "Add Ticket",
+      "editTicket": "Edit Ticket",
+      "ticketNumber": "Ticket #",
+      "ticketTitle": "Title",
+      "priority": "Priority",
+      "status": "Status",
+      "category": "Category",
+      "resolution": "Resolution",
+      "noTickets": "No tickets found",
+      "priorities": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "statuses": {
+        "open": "Open",
+        "in_progress": "In Progress",
+        "waiting_on_customer": "Waiting on Customer",
+        "resolved": "Resolved",
+        "closed": "Closed"
+      }
     }
   }
 }

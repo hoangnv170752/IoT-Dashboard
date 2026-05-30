@@ -148,6 +148,66 @@ Edit via `idf.py menuconfig` → IoT Dashboard Configuration:
 - Machine status reporting
 - Energy monitoring
 
+## Upcoming Features
+
+### Data Visualization & Analytics
+- **Time-Series Charts** - Interactive charts for visualizing telemetry data over time with zoom, pan, and date range selection
+- **Real-Time Data Streaming** - WebSocket-based live data updates for dashboards and charts
+- **Custom Dashboards** - Drag-and-drop dashboard builder with configurable widgets
+- **Data Export** - Export telemetry data to CSV, Excel, and PDF formats
+
+### AI-Powered Intelligence
+- **AI Data Assistant** - Natural language queries to get insights from your IoT data
+  - "What was the average temperature in Building A last week?"
+  - "Show me devices with unusual power consumption"
+  - "Predict when maintenance is needed for Motor-01"
+- **Anomaly Detection** - ML-based detection of abnormal device behavior and sensor readings
+- **Predictive Maintenance** - AI models to forecast equipment failures before they occur
+- **Smart Alerts** - Context-aware notifications based on learned patterns
+
+### Backend AI Services Integration
+- **LLM Integration** - Backend services for connecting to OpenAI, Claude, or local LLM models
+- **RAG Pipeline** - Retrieval-Augmented Generation for querying device documentation and historical data
+- **Vector Database** - Embeddings storage for semantic search across telemetry and device metadata
+- **AI Agent Framework** - Autonomous agents for monitoring, alerting, and automated responses
+
+### Notification System
+- **Multi-Channel Alerts** - Push notifications, email, SMS, and webhook integrations
+- **Alert Rules Engine** - Configurable thresholds and conditions for triggering notifications
+- **Escalation Policies** - Automatic escalation when alerts are not acknowledged
+- **Notification History** - Complete audit trail of all sent notifications
+
+### User Feedback & Collaboration
+- **In-App Feedback** - Built-in feedback system for users to report issues and suggest features
+- **Annotation System** - Add notes and comments to specific time ranges on charts
+- **Shared Views** - Generate shareable links for dashboards and reports
+- **Incident Management** - Track and resolve device-related incidents with team collaboration
+
+### Device Management Enhancements
+- **Bulk Operations** - Mass firmware updates, configuration changes, and device provisioning
+- **Device Groups** - Organize devices into logical groups with inherited permissions
+- **Remote Debugging** - Real-time logs and diagnostics from connected devices
+- **OTA Updates** - Over-the-air firmware updates with rollback capability
+
+### Security & Compliance
+- **Role-Based Access Control** - Granular permissions for users and teams
+- **Audit Logging** - Complete audit trail of all system actions
+- **Data Retention Policies** - Configurable data lifecycle management
+- **Compliance Reports** - Pre-built reports for regulatory compliance (ISO, IEC standards)
+
+## Roadmap
+
+| Phase | Features | Target |
+|-------|----------|--------|
+| Phase 1 | Time-series charts, Real-time streaming, Notification system | Q3 2025 |
+| Phase 2 | AI Data Assistant, Anomaly detection, Feedback system | Q4 2025 |
+| Phase 3 | Predictive maintenance, Custom dashboards, Bulk operations | Q1 2026 |
+| Phase 4 | RAG pipeline, AI agents, Advanced analytics | Q2 2026 |
+
+## Contributing
+
+We welcome contributions! Please see our contributing guidelines for more information.
+
 ## License
 
 MIT

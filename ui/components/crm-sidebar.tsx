@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Cpu, Box, Settings } from "lucide-react";
+import { LayoutDashboard, Building2, Users, HandCoins, Truck, FileText, TicketCheck } from "lucide-react";
 
 interface NavItem {
   titleKey: string;
@@ -13,29 +12,43 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-const navItems: NavItem[] = [
+const crmNavItems: NavItem[] = [
   {
-    titleKey: "nav.dashboard",
-    href: "/",
+    titleKey: "nav.crm.dashboard",
+    href: "/crm",
     icon: <LayoutDashboard className="h-4 w-4" />,
   },
   {
-    titleKey: "nav.devices",
-    href: "/device",
-    icon: <Cpu className="h-4 w-4" />,
+    titleKey: "nav.crm.companies",
+    href: "/crm/companies",
+    icon: <Building2 className="h-4 w-4" />,
   },
   {
-    titleKey: "nav.assets",
-    href: "/assets",
-    icon: <Box className="h-4 w-4" />,
+    titleKey: "nav.crm.contacts",
+    href: "/crm/contacts",
+    icon: <Users className="h-4 w-4" />,
   },
   {
-    titleKey: "nav.settings",
-    href: "/setting",
-    icon: <Settings className="h-4 w-4" />,
+    titleKey: "nav.crm.deals",
+    href: "/crm/deals",
+    icon: <HandCoins className="h-4 w-4" />,
+  },
+  {
+    titleKey: "nav.crm.vendors",
+    href: "/crm/vendors",
+    icon: <Truck className="h-4 w-4" />,
+  },
+  {
+    titleKey: "nav.crm.contracts",
+    href: "/crm/contracts",
+    icon: <FileText className="h-4 w-4" />,
+  },
+  {
+    titleKey: "nav.crm.tickets",
+    href: "/crm/tickets",
+    icon: <TicketCheck className="h-4 w-4" />,
   },
 ];
-
 
 interface NavLinkProps {
   item: NavItem;
@@ -65,11 +78,11 @@ function NavLink({ item, collapsed, title }: NavLinkProps) {
   );
 }
 
-interface SidebarProps {
+interface CrmSidebarProps {
   collapsed?: boolean;
 }
 
-export function Sidebar({ collapsed = false }: SidebarProps) {
+export function CrmSidebar({ collapsed = false }: CrmSidebarProps) {
   const t = useTranslations();
 
   return (
@@ -86,31 +99,22 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
           collapsed ? "justify-center px-2" : "px-4"
         )}
       >
-        <Image
-          src="/iot-icon.png"
-          alt="IoT"
-          width={32}
-          height={32}
-          className="rounded-md"
-        />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
+          <Building2 className="h-5 w-5 text-white" />
+        </div>
         {!collapsed && (
-          <span className="font-semibold text-foreground">IoT Dashboard</span>
+          <span className="font-semibold text-foreground">CRM Portal</span>
         )}
       </div>
 
-      {/* IoT Navigation */}
+      {/* Navigation */}
       <nav
         className={cn(
           "flex-1 space-y-1 overflow-y-auto py-4",
           collapsed ? "px-2" : "px-3"
         )}
       >
-        {!collapsed && (
-          <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {t("nav.iot")}
-          </div>
-        )}
-        {navItems.map((item) => (
+        {crmNavItems.map((item) => (
           <NavLink
             key={item.href}
             item={item}
@@ -119,6 +123,21 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
           />
         ))}
       </nav>
+
+      {/* Link to IoT Dashboard */}
+      <div className={cn("border-t border-border p-3", collapsed && "px-2")}>
+        <Link
+          href="/signin"
+          className={cn(
+            "flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors",
+            collapsed && "justify-center px-2"
+          )}
+          title={collapsed ? "IoT Dashboard" : undefined}
+        >
+          <LayoutDashboard className="h-4 w-4" />
+          {!collapsed && <span>IoT Dashboard</span>}
+        </Link>
+      </div>
     </aside>
   );
 }

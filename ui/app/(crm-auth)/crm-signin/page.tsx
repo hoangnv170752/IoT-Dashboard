@@ -8,38 +8,43 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Loader2, ArrowUp, Building2 } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import { Eye, EyeOff, Loader2, Building2 } from "lucide-react";
+import { useCrmAuth } from "@/contexts/crm-auth-context";
 import { toast } from "sonner";
 
-const suggestions = [
-  "Monitor temperature sensors in real-time",
-  "Track device connectivity status",
-  "Set up automated alerts",
-  "Visualize sensor data with charts",
-  "Manage multiple IoT devices",
-  "Configure device thresholds",
-  "View historical data analytics",
-  "Control actuators remotely",
+const crmFeatures = [
+  "Manage companies and contacts",
+  "Track deals and sales pipeline",
+  "Handle vendor relationships",
+  "Manage contracts and agreements",
+  "Process support tickets",
+  "View comprehensive CRM analytics",
 ];
 
-export default function SignInPage() {
+export default function CrmSignInPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isLoggedIn } = useCrmAuth();
   const t = useTranslations();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [currentSuggestion, setCurrentSuggestion] = useState(0);
+  const [currentFeature, setCurrentFeature] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Rotate suggestions every 3 seconds
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push("/crm");
+    }
+  }, [isLoggedIn, router]);
+
+  // Rotate features every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setIsAnimating(true);
       setTimeout(() => {
-        setCurrentSuggestion((prev) => (prev + 1) % suggestions.length);
+        setCurrentFeature((prev) => (prev + 1) % crmFeatures.length);
         setIsAnimating(false);
       }, 300);
     }, 3000);
@@ -52,11 +57,12 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      await login({ username: email, password });
-      router.push("/");
+      await login(email, password);
+      toast.success("Welcome to CRM!");
+      router.push("/crm");
     } catch (err) {
       console.error(err);
-      toast.error("Login failed. Please try again.");
+      toast.error(err instanceof Error ? err.message : "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -68,14 +74,10 @@ export default function SignInPage() {
       <div className="flex flex-1 flex-col justify-between p-6 md:p-10 lg:p-16">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <Image
-            src="/iot-icon.png"
-            alt="IoT Dashboard"
-            width={32}
-            height={32}
-            className="h-8 w-8"
-          />
-          <span className="text-xl font-semibold text-foreground">IoT Dashboard</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
+            <Building2 className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-xl font-semibold text-foreground">CRM Portal</span>
         </div>
 
         {/* Form */}
@@ -83,8 +85,11 @@ export default function SignInPage() {
           <div className="w-full max-w-sm">
             <div className="mb-8">
               <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-                {t("auth.signInTitle")}
+                Sign in to CRM
               </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Enter your admin credentials to access the CRM system
+              </p>
             </div>
 
             {/* Email/Password Form */}
@@ -94,7 +99,7 @@ export default function SignInPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder="admin@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-11"
@@ -135,34 +140,25 @@ export default function SignInPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t("auth.signingIn")}
+                    Signing in...
                   </>
                 ) : (
-                  t("auth.signIn")
+                  "Sign in to CRM"
                 )}
               </Button>
             </form>
 
-            {/* Contact Admin */}
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-              {t("common.dontHaveAccount")}{" "}
-              <a
-                href={`mailto:admin@${process.env.NEXT_PUBLIC_API_URL?.replace(/^https?:\/\//, '').replace(/\/api$/, '') || 'example.com'}`}
-                className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
-              >
-                {t("common.contactAdmin")}
-              </a>
-            </p>
-
-            {/* CRM Login Link */}
-            <div className="mt-6 pt-6 border-t border-border">
-              <Link
-                href="/crm-signin"
-                className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Building2 className="h-4 w-4" />
-                <span>{t("auth.crmLogin") || "CRM Admin Login"}</span>
-              </Link>
+            {/* Link to IoT signin */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                Looking for IoT Dashboard?{" "}
+                <Link
+                  href="/signin"
+                  className="font-medium text-foreground underline underline-offset-4 hover:text-primary"
+                >
+                  Sign in here
+                </Link>
+              </p>
             </div>
           </div>
         </div>
@@ -182,34 +178,33 @@ export default function SignInPage() {
       </div>
 
       {/* Right side - Decorative */}
-      <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center bg-gradient-to-br from-blue-50 via-sky-100 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-10 rounded-l-3xl m-4 overflow-hidden">
+      <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center bg-gradient-to-br from-indigo-50 via-purple-100 to-pink-50 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 p-10 rounded-l-3xl m-4 overflow-hidden">
         <div className="relative w-full max-w-md">
           {/* Floating decorative card */}
           <div className="animate-float rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-xl p-6">
-            <div className="flex items-center gap-3">
-              <div className="flex-1 overflow-hidden">
-                <p
-                  className={`text-lg text-muted-foreground transition-all duration-300 ${
-                    isAnimating
-                      ? "opacity-0 translate-y-4"
-                      : "opacity-100 translate-y-0"
-                  }`}
-                >
-                  {suggestions[currentSuggestion]}
-                </p>
-              </div>
-              <Button size="icon" className="rounded-xl h-10 w-10 shrink-0">
-                <ArrowUp className="h-4 w-4" />
-              </Button>
+            <div className="flex items-center gap-3 mb-4">
+              <Building2 className="h-6 w-6 text-indigo-500" />
+              <span className="font-semibold text-foreground">CRM Features</span>
+            </div>
+            <div className="overflow-hidden">
+              <p
+                className={`text-lg text-muted-foreground transition-all duration-300 ${
+                  isAnimating
+                    ? "opacity-0 translate-y-4"
+                    : "opacity-100 translate-y-0"
+                }`}
+              >
+                {crmFeatures[currentFeature]}
+              </p>
             </div>
             {/* Progress dots */}
             <div className="flex justify-center gap-1.5 mt-4">
-              {suggestions.map((_, index) => (
+              {crmFeatures.map((_, index) => (
                 <div
                   key={index}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    index === currentSuggestion
-                      ? "w-4 bg-primary"
+                    index === currentFeature
+                      ? "w-4 bg-indigo-500"
                       : "w-1.5 bg-muted-foreground/30"
                   }`}
                 />
@@ -217,10 +212,10 @@ export default function SignInPage() {
             </div>
           </div>
 
-          {/* Background decorative elements with floating animation */}
-          <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-blue-200/50 dark:bg-blue-900/30 blur-3xl animate-float-slow" />
-          <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-cyan-200/50 dark:bg-cyan-900/30 blur-3xl animate-float-slower" />
-          <div className="absolute top-1/2 -right-10 h-24 w-24 rounded-full bg-purple-200/40 dark:bg-purple-900/20 blur-2xl animate-float" />
+          {/* Background decorative elements */}
+          <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-indigo-200/50 dark:bg-indigo-900/30 blur-3xl animate-float-slow" />
+          <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-purple-200/50 dark:bg-purple-900/30 blur-3xl animate-float-slower" />
+          <div className="absolute top-1/2 -right-10 h-24 w-24 rounded-full bg-pink-200/40 dark:bg-pink-900/20 blur-2xl animate-float" />
         </div>
       </div>
     </div>

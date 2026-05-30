@@ -21,6 +21,7 @@
     "dontHaveAccount": "没有账户？"
   },
   "nav": {
+    "iot": "物联网平台",
     "dashboard": "仪表盘",
     "devices": "设备",
     "assets": "资产",
@@ -28,7 +29,17 @@
     "signOut": "退出登录",
     "feedback": "反馈",
     "docs": "文档",
-    "ask": "询问"
+    "ask": "询问",
+    "crm": {
+      "title": "客户关系",
+      "dashboard": "仪表盘",
+      "companies": "公司",
+      "contacts": "联系人",
+      "deals": "交易",
+      "vendors": "供应商",
+      "contracts": "合同",
+      "tickets": "工单"
+    }
   },
   "auth": {
     "signIn": "登录",
@@ -41,7 +52,9 @@
     "termsText": "登录即表示您同意我们的",
     "termsOfService": "服务条款",
     "and": "和",
-    "privacyPolicy": "隐私政策"
+    "privacyPolicy": "隐私政策",
+    "crmLogin": "CRM 管理员登录",
+    "iotLogin": "IoT 平台登录"
   },
   "dashboard": {
     "title": "仪表盘",
@@ -116,6 +129,167 @@
       "chinese": "简体中文",
       "french": "法语",
       "spanish": "西班牙语"
+    }
+  },
+  "crm": {
+    "dashboard": {
+      "title": "CRM 仪表盘",
+      "description": "客户关系概览",
+      "totalCompanies": "公司总数",
+      "totalContacts": "联系人总数",
+      "totalDeals": "交易总数",
+      "dealValue": "交易价值",
+      "openTickets": "待处理工单",
+      "activeContracts": "活跃合同",
+      "dealsByStage": "按阶段分类的交易",
+      "recentActivity": "最近活动"
+    },
+    "companies": {
+      "title": "公司",
+      "description": "管理您的企业客户",
+      "addCompany": "添加公司",
+      "editCompany": "编辑公司",
+      "deleteCompany": "删除公司",
+      "name": "公司名称",
+      "industry": "行业",
+      "website": "网站",
+      "phone": "电话",
+      "address": "地址",
+      "size": "规模",
+      "noCompanies": "未找到公司",
+      "sizes": {
+        "small": "小型",
+        "medium": "中型",
+        "large": "大型",
+        "enterprise": "企业级"
+      }
+    },
+    "contacts": {
+      "title": "联系人",
+      "description": "管理您的业务联系人",
+      "addContact": "添加联系人",
+      "editContact": "编辑联系人",
+      "deleteContact": "删除联系人",
+      "firstName": "名",
+      "lastName": "姓",
+      "email": "邮箱",
+      "phone": "电话",
+      "position": "职位",
+      "company": "公司",
+      "notes": "备注",
+      "noContacts": "未找到联系人"
+    },
+    "deals": {
+      "title": "交易",
+      "description": "跟踪您的销售管道",
+      "addDeal": "添加交易",
+      "editDeal": "编辑交易",
+      "deleteDeal": "删除交易",
+      "dealTitle": "标题",
+      "value": "价值",
+      "stage": "阶段",
+      "probability": "概率",
+      "expectedClose": "预计成交",
+      "contact": "联系人",
+      "company": "公司",
+      "noDeals": "未找到交易",
+      "stages": {
+        "lead": "线索",
+        "qualified": "已认证",
+        "proposal": "提案",
+        "negotiation": "谈判",
+        "closed_won": "成功签约",
+        "closed_lost": "失败"
+      }
+    },
+    "vendors": {
+      "title": "供应商",
+      "description": "管理您的供应商和合作伙伴",
+      "addVendor": "添加供应商",
+      "editVendor": "编辑供应商",
+      "deleteVendor": "删除供应商",
+      "name": "供应商名称",
+      "code": "代码",
+      "type": "类型",
+      "email": "邮箱",
+      "phone": "电话",
+      "website": "网站",
+      "address": "地址",
+      "country": "国家",
+      "rating": "评级",
+      "status": "状态",
+      "noVendors": "未找到供应商",
+      "types": {
+        "supplier": "供应商",
+        "manufacturer": "制造商",
+        "distributor": "分销商",
+        "service_provider": "服务提供商"
+      },
+      "statuses": {
+        "pending": "待审核",
+        "active": "活跃",
+        "inactive": "不活跃",
+        "blacklisted": "黑名单"
+      }
+    },
+    "contracts": {
+      "title": "合同",
+      "description": "管理您的业务协议",
+      "addContract": "添加合同",
+      "editContract": "编辑合同",
+      "deleteContract": "删除合同",
+      "contractNumber": "合同编号",
+      "contractTitle": "标题",
+      "type": "类型",
+      "vendor": "供应商",
+      "company": "公司",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "value": "价值",
+      "status": "状态",
+      "noContracts": "未找到合同",
+      "types": {
+        "purchase": "采购",
+        "sales": "销售",
+        "service": "服务",
+        "maintenance": "维护",
+        "subscription": "订阅",
+        "nda": "保密协议",
+        "partnership": "合作伙伴"
+      },
+      "statuses": {
+        "draft": "草稿",
+        "pending_approval": "待批准",
+        "active": "活跃",
+        "expired": "已过期",
+        "cancelled": "已取消"
+      }
+    },
+    "tickets": {
+      "title": "服务工单",
+      "description": "管理客户支持请求",
+      "addTicket": "添加工单",
+      "editTicket": "编辑工单",
+      "ticketNumber": "工单号",
+      "ticketTitle": "标题",
+      "priority": "优先级",
+      "status": "状态",
+      "category": "类别",
+      "resolution": "解决方案",
+      "noTickets": "未找到工单",
+      "priorities": {
+        "low": "低",
+        "medium": "中",
+        "high": "高",
+        "critical": "紧急"
+      },
+      "statuses": {
+        "open": "待处理",
+        "in_progress": "处理中",
+        "waiting_on_customer": "等待客户",
+        "resolved": "已解决",
+        "closed": "已关闭"
+      }
     }
   }
 }

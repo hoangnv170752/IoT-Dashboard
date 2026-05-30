@@ -4,7 +4,17 @@
       "PowerShell(New-Item -ItemType Directory -Path \"d:\\\\IoT-Dashboard\\\\android\")",
       "PowerShell($items = @\\('app','gradle','.gradle','.idea','build.gradle.kts','settings.gradle.kts','gradle.properties','gradlew','gradlew.bat','local.properties','.gitignore'\\); foreach \\($i in $items\\) { $src = Join-Path 'd:\\\\IoT-Dashboard' $i; if \\(Test-Path $src\\) { Move-Item -Path $src -Destination 'd:\\\\IoT-Dashboard\\\\android\\\\' -Force; Write-Output \"moved: $i\" } else { Write-Output \"missing: $i\" } })",
       "PowerShell(& 'd:\\\\IoT-Dashboard\\\\android\\\\gradlew.bat' -p 'd:\\\\IoT-Dashboard\\\\android' help --quiet 2>&1)",
-      "Bash(node -e \"const m = require\\('/d/IoT-Dashboard/ui/node_modules/lucide-react'\\); console.log\\('Eye:', typeof m.Eye, 'EyeOff:', typeof m.EyeOff, 'EyeIcon:', typeof m.EyeIcon, 'EyeOffIcon:', typeof m.EyeOffIcon\\);\")"
+      "Bash(node -e \"const m = require\\('/d/IoT-Dashboard/ui/node_modules/lucide-react'\\); console.log\\('Eye:', typeof m.Eye, 'EyeOff:', typeof m.EyeOff, 'EyeIcon:', typeof m.EyeIcon, 'EyeOffIcon:', typeof m.EyeOffIcon\\);\")",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(npx prisma init)",
+      "Bash(npx prisma:*)",
+      "Bash(npx tsx scripts/explore-db.ts)",
+      "Bash(ls:*)",
+      "Bash(pnpm exec prisma generate:*)",
+      "Bash(pnpm exec prisma db push:*)",
+      "Bash(pnpm exec tsc:*)",
+      "Bash(pnpm remove:*)"
     ]
   }
 }

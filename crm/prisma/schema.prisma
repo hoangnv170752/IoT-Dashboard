@@ -1,0 +1,898 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =====================
+// Multi-Tenancy Core
+// =====================
+
+model Tenant {
+  id                  String       @id @default(uuid())
+  name                String
+  slug                String       @unique // URL-friendly identifier
+  domain              String?      @unique // Custom domain if any
+  thingsboardTenantId String?      @unique // Links to ThingsBoard tenant
+  logo                String?      // Logo URL
+  primaryColor        String?      // Brand color hex
+  settings            Json?        // Additional tenant settings
+  status              TenantStatus @default(pending)
+  stripeCustomerId    String?      @unique // Stripe customer ID
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  // Relations
+  users             User[]
+  companies         Company[]
+  vendors           Vendor[]
+  items             Item[]
+  contracts         Contract[]
+  subscription      Subscription?
+  deviceAssignments DeviceAssignment[]
+  assetAssignments  AssetAssignment[]
+  chatSessions      ChatSession[]
+  alertRules        AlertRule[]
+  auditLogs         AuditLog[]
+
+  @@map("tenants")
+}
+
+enum TenantStatus {
+  pending
+  active
+  suspended
+  cancelled
+}
+
+model User {
+  id                String     @id @default(uuid())
+  email             String     @unique
+  passwordHash      String?    // Only for SysAdmin users
+  firstName         String
+  lastName          String
+  phone             String?
+  avatar            String?
+  thingsboardUserId String?    @unique // Links to ThingsBoard user, null for SysAdmin
+  role              UserRole   @default(tenant_user)
+  status            UserStatus @default(active)
+  emailVerified     Boolean    @default(false)
+  lastLoginAt       DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Relations
+  tenantId    String? // Null for SysAdmin
+  tenant      Tenant?        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companyId   String? // For customer_user role
+  company     Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  permissions UserPermission[]
+  activities  Activity[]
+  notifications Notification[]
+  auditLogs   AuditLog[]
+  feedbacks   Feedback[]
+  chatSessions ChatSession[]
+  serviceTickets ServiceTicket[]
+
+  // Direct Messaging
+  conversationParticipants ConversationParticipant[]
+  sentMessages            DirectMessage[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  sys_admin
+  tenant_admin
+  tenant_user
+  customer_user
+}
+
+enum UserStatus {
+  active
+  inactive
+  suspended
+  pending_verification
+}
+
+model UserPermission {
+  id         String   @id @default(uuid())
+  resource   String   // e.g., "devices", "companies", "contracts"
+  action     String   // e.g., "read", "write", "delete", "admin"
+  conditions Json?    // Additional conditions (e.g., specific device types)
+  createdAt  DateTime @default(now())
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resource, action])
+  @@map("user_permissions")
+}
+
+// =====================
+// Vendor Management
+// =====================
+
+model Vendor {
+  id           String       @id @default(uuid())
+  name         String
+  code         String       // Internal vendor code
+  type         VendorType   @default(supplier)
+  email        String?
+  phone        String?
+  website      String?
+  address      String?
+  city         String?
+  country      String?
+  taxId        String?
+  paymentTerms String?      // e.g., "Net 30", "Net 60"
+  currency     String       @default("USD")
+  rating       Float?       // Vendor performance rating
+  status       VendorStatus @default(pending)
+  notes        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  tenantId  String
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contacts  VendorContact[]
+  items     Item[]
+  contracts Contract[]
+
+  @@unique([tenantId, code])
+  @@map("vendors")
+}
+
+enum VendorType {
+  supplier
+  manufacturer
+  distributor
+  service_provider
+  partner
+}
+
+enum VendorStatus {
+  pending
+  active
+  inactive
+  blacklisted
+}
+
+model VendorContact {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  position  String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  vendorId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@map("vendor_contacts")
+}
+
+// =====================
+// Item/Product Management
+// =====================
+
+model Item {
+  id                 String     @id @default(uuid())
+  sku                String     // Stock Keeping Unit
+  name               String
+  description        String?
+  category           String?
+  subcategory        String?
+  tags               String[]   // Array of tags
+  manufacturerPartNo String?
+  unitPrice          Float?
+  currency           String     @default("USD")
+  specifications     Json?      // Technical specifications
+  weight             Float?     // Weight in kg
+  dimensions         String?    // e.g., "10x20x30 cm"
+  trackInventory     Boolean    @default(false)
+  minStockLevel      Int?
+  currentStock       Int        @default(0)
+  status             ItemStatus @default(draft)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  tenantId      String
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vendorId      String?
+  vendor        Vendor?        @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  contractItems ContractItem[]
+
+  @@unique([tenantId, sku])
+  @@map("items")
+}
+
+enum ItemStatus {
+  draft
+  active
+  discontinued
+  archived
+}
+
+// =====================
+// Contract Management
+// =====================
+
+model Contract {
+  id              String         @id @default(uuid())
+  contractNumber  String
+  title           String
+  description     String?
+  type            ContractType
+  startDate       DateTime
+  endDate         DateTime?
+  autoRenew       Boolean        @default(false)
+  renewalTermDays Int?           // Days for auto-renewal
+  totalValue      Float?
+  currency        String         @default("USD")
+  paymentTerms    String?
+  slaLevel        String?        // Service Level Agreement level
+  slaDetails      Json?          // Detailed SLA terms
+  documentUrls    String[]       // Array of document URLs
+  status          ContractStatusEnum @default(draft)
+  signedAt        DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  tenantId  String
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  vendorId  String?
+  vendor    Vendor?        @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  companyId String?
+  company   Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  items     ContractItem[]
+
+  @@unique([tenantId, contractNumber])
+  @@map("contracts")
+}
+
+enum ContractType {
+  purchase
+  sales
+  service
+  maintenance
+  subscription
+  nda
+  partnership
+}
+
+enum ContractStatusEnum {
+  draft
+  pending_approval
+  approved
+  active
+  expired
+  cancelled
+  terminated
+}
+
+model ContractItem {
+  id          String  @id @default(uuid())
+  description String?
+  quantity    Float   @default(1)
+  unitPrice   Float
+  discount    Float   @default(0) // Percentage
+  total       Float
+  notes       String?
+
+  // Relations
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  itemId     String?
+  item       Item?    @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@map("contract_items")
+}
+
+// =====================
+// Subscription & Billing
+// =====================
+
+model Plan {
+  id                   String   @id @default(uuid())
+  name                 String
+  code                 String   @unique // e.g., "starter", "professional", "enterprise"
+  description          String?
+  stripePriceIdMonthly String?  // Stripe price ID for monthly billing
+  stripePriceIdYearly  String?  // Stripe price ID for yearly billing
+  monthlyPrice         Float
+  yearlyPrice          Float
+  currency             String   @default("USD")
+  maxUsers             Int?     // Null = unlimited
+  maxDevices           Int?
+  maxAssets            Int?
+  maxStorageGb         Float?
+  features             String[] // List of feature names
+  featureFlags         Json?    // Detailed feature flags
+  isActive             Boolean  @default(true)
+  isPublic             Boolean  @default(true) // Show on pricing page
+  sortOrder            Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relations
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  stripeSubscriptionId String?            @unique
+  stripeCustomerId     String?
+  billingCycle         BillingCycle       @default(monthly)
+  startDate            DateTime           @default(now())
+  endDate              DateTime?
+  trialEndDate         DateTime?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  status               SubscriptionStatus @default(trialing)
+  cancelAtPeriodEnd    Boolean            @default(false)
+  cancelledAt          DateTime?
+  currentUsage         Json?              // Track usage: users, devices, storage
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  // Relations
+  tenantId String @unique
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planId   String
+  plan     Plan   @relation(fields: [planId], references: [id])
+  invoices Invoice[]
+
+  @@map("subscriptions")
+}
+
+enum BillingCycle {
+  monthly
+  yearly
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  cancelled
+  unpaid
+  paused
+}
+
+model Invoice {
+  id               String        @id @default(uuid())
+  stripeInvoiceId  String?       @unique
+  invoiceNumber    String
+  hostedInvoiceUrl String?
+  pdfUrl           String?
+  amount           Float
+  tax              Float         @default(0)
+  total            Float
+  currency         String        @default("USD")
+  periodStart      DateTime
+  periodEnd        DateTime
+  status           InvoiceStatus @default(draft)
+  paidAt           DateTime?
+  createdAt        DateTime      @default(now())
+
+  // Relations
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  draft
+  open
+  paid
+  void
+  uncollectible
+}
+
+// =====================
+// Notifications
+// =====================
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?            // Additional data payload
+  actionUrl String?          // Link for the notification action
+  read      Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  info
+  success
+  warning
+  error
+  alert
+  system
+}
+
+// =====================
+// Audit Logging
+// =====================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String   // e.g., "create", "update", "delete"
+  resource   String   // e.g., "company", "device", "contract"
+  resourceId String?
+  oldValues  Json?
+  newValues  Json?
+  metadata   Json?    // IP address, user agent, etc.
+  createdAt  DateTime @default(now())
+
+  // Relations
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([resource, resourceId])
+  @@map("audit_logs")
+}
+
+// =====================
+// CRM Core Models
+// =====================
+
+model Company {
+  id        String       @id @default(uuid())
+  name      String
+  industry  String?
+  website   String?
+  address   String?
+  phone     String?
+  size      CompanySize?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Multi-tenancy
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Relations
+  contacts   Contact[]
+  deals      Deal[]
+  activities Activity[]
+  users      User[]      // Customer users belonging to this company
+  contracts  Contract[]
+
+  // ThingsBoard Integration
+  deviceAssignments DeviceAssignment[]
+  assetAssignments  AssetAssignment[]
+
+  @@map("companies")
+}
+
+enum CompanySize {
+  small
+  medium
+  large
+  enterprise
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  phone     String?
+  position  String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  companyId  String?
+  company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  deals      Deal[]
+  activities Activity[]
+
+  @@map("contacts")
+}
+
+model Deal {
+  id                String    @id @default(uuid())
+  title             String
+  value             Float
+  currency          String    @default("USD")
+  stage             DealStage @default(lead)
+  probability       Float?
+  expectedCloseDate DateTime?
+  notes             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  contactId  String?
+  contact    Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  companyId  String?
+  company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  activities Activity[]
+
+  @@map("deals")
+}
+
+enum DealStage {
+  lead
+  qualified
+  proposal
+  negotiation
+  closed_won
+  closed_lost
+}
+
+model Activity {
+  id          String       @id @default(uuid())
+  type        ActivityType
+  subject     String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  dealId    String?
+  deal      Deal?    @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  userId    String?  // User who created/owns this activity
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("activities")
+}
+
+enum ActivityType {
+  call
+  email
+  meeting
+  note
+  task
+}
+
+// =====================
+// ThingsBoard Integration
+// =====================
+
+// Links ThingsBoard devices to CRM companies for ownership tracking
+model DeviceAssignment {
+  id                  String   @id @default(uuid())
+  thingsboardDeviceId String   // ThingsBoard device UUID
+  deviceName          String   // Cached device name from ThingsBoard
+  deviceType          String?  // Device profile/type
+  assignedAt          DateTime @default(now())
+  notes               String?
+
+  // Multi-tenancy
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Relations
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Maintenance and service tracking
+  serviceContracts ServiceContract[]
+  serviceTickets   ServiceTicket[]
+
+  @@unique([thingsboardDeviceId])
+  @@map("device_assignments")
+}
+
+// Links ThingsBoard assets to CRM companies
+model AssetAssignment {
+  id                 String   @id @default(uuid())
+  thingsboardAssetId String   // ThingsBoard asset UUID
+  assetName          String   // Cached asset name from ThingsBoard
+  assetType          String?  // Asset profile/type
+  location           String?  // Physical location
+  assignedAt         DateTime @default(now())
+  notes              String?
+
+  // Multi-tenancy
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Relations
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([thingsboardAssetId])
+  @@map("asset_assignments")
+}
+
+// =====================
+// Service & Support
+// =====================
+
+model ServiceContract {
+  id             String              @id @default(uuid())
+  contractNumber String              @unique
+  type           ServiceContractType
+  startDate      DateTime
+  endDate        DateTime
+  value          Float
+  currency       String              @default("USD")
+  status         ContractStatus      @default(active)
+  slaLevel       String?             // e.g., "Gold", "Silver", "Bronze"
+  description    String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  // Relations
+  deviceAssignmentId String?
+  deviceAssignment   DeviceAssignment? @relation(fields: [deviceAssignmentId], references: [id], onDelete: SetNull)
+
+  @@map("service_contracts")
+}
+
+enum ServiceContractType {
+  maintenance
+  support
+  warranty
+  subscription
+}
+
+enum ContractStatus {
+  draft
+  active
+  expired
+  cancelled
+}
+
+model ServiceTicket {
+  id           String         @id @default(uuid())
+  ticketNumber String         @unique
+  title        String
+  description  String?
+  priority     TicketPriority @default(medium)
+  status       TicketStatus   @default(open)
+  category     String?        // e.g., "Hardware", "Software", "Connectivity"
+  resolution   String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  resolvedAt   DateTime?
+
+  // Relations
+  deviceAssignmentId String?
+  deviceAssignment   DeviceAssignment? @relation(fields: [deviceAssignmentId], references: [id], onDelete: SetNull)
+
+  // User who reported the ticket
+  reportedById String?
+  reportedBy   User?   @relation(fields: [reportedById], references: [id], onDelete: SetNull)
+
+  @@map("service_tickets")
+}
+
+enum TicketPriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  waiting_on_customer
+  waiting_on_vendor
+  resolved
+  closed
+}
+
+// =====================
+// Notifications & Alerts
+// =====================
+
+model AlertRule {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  deviceType  String?       // Filter by device type, null = all devices
+  condition   String        // JSON condition definition
+  severity    AlertSeverity @default(warning)
+  enabled     Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Multi-tenancy
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Relations
+  alertHistory AlertHistory[]
+
+  @@map("alert_rules")
+}
+
+enum AlertSeverity {
+  info
+  warning
+  critical
+}
+
+model AlertHistory {
+  id                  String        @id @default(uuid())
+  thingsboardDeviceId String
+  deviceName          String
+  message             String
+  severity            AlertSeverity
+  acknowledged        Boolean       @default(false)
+  acknowledgedAt      DateTime?
+  acknowledgedBy      String?       // User who acknowledged
+  createdAt           DateTime      @default(now())
+
+  // Relations
+  alertRuleId String?
+  alertRule   AlertRule? @relation(fields: [alertRuleId], references: [id], onDelete: SetNull)
+
+  @@map("alert_history")
+}
+
+// =====================
+// User Feedback
+// =====================
+
+model Feedback {
+  id        String         @id @default(uuid())
+  type      FeedbackType
+  subject   String
+  message   String
+  userEmail String?
+  status    FeedbackStatus @default(new)
+  response  String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  // Relations
+  submittedById String?
+  submittedBy   User?   @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+
+  @@map("feedback")
+}
+
+enum FeedbackType {
+  bug
+  feature_request
+  question
+  general
+}
+
+enum FeedbackStatus {
+  new
+  in_review
+  planned
+  completed
+  declined
+}
+
+// =====================
+// AI Chat History
+// =====================
+
+model ChatSession {
+  id        String   @id @default(uuid())
+  userEmail String?
+  title     String?  // Auto-generated or user-defined title
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Multi-tenancy
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // User relation
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Relations
+  messages ChatMessage[]
+
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  role      String   // "user" or "assistant"
+  content   String
+  metadata  Json?    // Store any additional data (devices mentioned, queries run, etc.)
+  createdAt DateTime @default(now())
+
+  // Relations
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+// =====================
+// Direct Messaging (User-to-User / Tenant-to-SysAdmin)
+// =====================
+
+model Conversation {
+  id        String             @id @default(uuid())
+  title     String?            // Optional title (e.g., "Support Request")
+  type      ConversationType   @default(direct)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  // Relations
+  participants ConversationParticipant[]
+  messages     DirectMessage[]
+
+  @@map("conversations")
+}
+
+enum ConversationType {
+  direct       // 1-to-1 between two users
+  group        // Group chat (tenant users + sysadmin)
+  support      // Tenant-to-SysAdmin support channel
+}
+
+model ConversationParticipant {
+  id        String   @id @default(uuid())
+  joinedAt  DateTime @default(now())
+  lastReadAt DateTime? // Track read receipts
+
+  // Relations
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@map("conversation_participants")
+}
+
+model DirectMessage {
+  id        String   @id @default(uuid())
+  content   String
+  metadata  Json?    // Attachments, links, etc.
+  editedAt  DateTime?
+  deletedAt DateTime? // Soft delete
+  createdAt DateTime @default(now())
+
+  // Relations
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("direct_messages")
+}

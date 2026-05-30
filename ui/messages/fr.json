@@ -21,6 +21,7 @@
     "dontHaveAccount": "Vous n'avez pas de compte ?"
   },
   "nav": {
+    "iot": "Plateforme IoT",
     "dashboard": "Tableau de bord",
     "devices": "Appareils",
     "assets": "Actifs",
@@ -28,7 +29,17 @@
     "signOut": "Déconnexion",
     "feedback": "Commentaires",
     "docs": "Documentation",
-    "ask": "Demander"
+    "ask": "Demander",
+    "crm": {
+      "title": "CRM",
+      "dashboard": "Tableau de bord",
+      "companies": "Entreprises",
+      "contacts": "Contacts",
+      "deals": "Affaires",
+      "vendors": "Fournisseurs",
+      "contracts": "Contrats",
+      "tickets": "Tickets"
+    }
   },
   "auth": {
     "signIn": "Connexion",
@@ -41,7 +52,9 @@
     "termsText": "En vous connectant, vous acceptez nos",
     "termsOfService": "Conditions d'utilisation",
     "and": "et",
-    "privacyPolicy": "Politique de confidentialité"
+    "privacyPolicy": "Politique de confidentialité",
+    "crmLogin": "Connexion Admin CRM",
+    "iotLogin": "Connexion Plateforme IoT"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -116,6 +129,167 @@
       "chinese": "Chinois (simplifié)",
       "french": "Français",
       "spanish": "Espagnol"
+    }
+  },
+  "crm": {
+    "dashboard": {
+      "title": "Tableau de bord CRM",
+      "description": "Vue d'ensemble de vos relations clients",
+      "totalCompanies": "Total des entreprises",
+      "totalContacts": "Total des contacts",
+      "totalDeals": "Total des affaires",
+      "dealValue": "Valeur des affaires",
+      "openTickets": "Tickets ouverts",
+      "activeContracts": "Contrats actifs",
+      "dealsByStage": "Affaires par étape",
+      "recentActivity": "Activité récente"
+    },
+    "companies": {
+      "title": "Entreprises",
+      "description": "Gérer vos clients entreprises",
+      "addCompany": "Ajouter une entreprise",
+      "editCompany": "Modifier l'entreprise",
+      "deleteCompany": "Supprimer l'entreprise",
+      "name": "Nom de l'entreprise",
+      "industry": "Secteur",
+      "website": "Site web",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "size": "Taille",
+      "noCompanies": "Aucune entreprise trouvée",
+      "sizes": {
+        "small": "Petite",
+        "medium": "Moyenne",
+        "large": "Grande",
+        "enterprise": "Entreprise"
+      }
+    },
+    "contacts": {
+      "title": "Contacts",
+      "description": "Gérer vos contacts professionnels",
+      "addContact": "Ajouter un contact",
+      "editContact": "Modifier le contact",
+      "deleteContact": "Supprimer le contact",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "position": "Poste",
+      "company": "Entreprise",
+      "notes": "Notes",
+      "noContacts": "Aucun contact trouvé"
+    },
+    "deals": {
+      "title": "Affaires",
+      "description": "Suivre votre pipeline de ventes",
+      "addDeal": "Ajouter une affaire",
+      "editDeal": "Modifier l'affaire",
+      "deleteDeal": "Supprimer l'affaire",
+      "dealTitle": "Titre",
+      "value": "Valeur",
+      "stage": "Étape",
+      "probability": "Probabilité",
+      "expectedClose": "Date de clôture prévue",
+      "contact": "Contact",
+      "company": "Entreprise",
+      "noDeals": "Aucune affaire trouvée",
+      "stages": {
+        "lead": "Prospect",
+        "qualified": "Qualifié",
+        "proposal": "Proposition",
+        "negotiation": "Négociation",
+        "closed_won": "Gagné",
+        "closed_lost": "Perdu"
+      }
+    },
+    "vendors": {
+      "title": "Fournisseurs",
+      "description": "Gérer vos fournisseurs et partenaires",
+      "addVendor": "Ajouter un fournisseur",
+      "editVendor": "Modifier le fournisseur",
+      "deleteVendor": "Supprimer le fournisseur",
+      "name": "Nom du fournisseur",
+      "code": "Code",
+      "type": "Type",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "website": "Site web",
+      "address": "Adresse",
+      "country": "Pays",
+      "rating": "Évaluation",
+      "status": "Statut",
+      "noVendors": "Aucun fournisseur trouvé",
+      "types": {
+        "supplier": "Fournisseur",
+        "manufacturer": "Fabricant",
+        "distributor": "Distributeur",
+        "service_provider": "Prestataire de services"
+      },
+      "statuses": {
+        "pending": "En attente",
+        "active": "Actif",
+        "inactive": "Inactif",
+        "blacklisted": "Liste noire"
+      }
+    },
+    "contracts": {
+      "title": "Contrats",
+      "description": "Gérer vos accords commerciaux",
+      "addContract": "Ajouter un contrat",
+      "editContract": "Modifier le contrat",
+      "deleteContract": "Supprimer le contrat",
+      "contractNumber": "Numéro de contrat",
+      "contractTitle": "Titre",
+      "type": "Type",
+      "vendor": "Fournisseur",
+      "company": "Entreprise",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "value": "Valeur",
+      "status": "Statut",
+      "noContracts": "Aucun contrat trouvé",
+      "types": {
+        "purchase": "Achat",
+        "sales": "Vente",
+        "service": "Service",
+        "maintenance": "Maintenance",
+        "subscription": "Abonnement",
+        "nda": "Accord de confidentialité",
+        "partnership": "Partenariat"
+      },
+      "statuses": {
+        "draft": "Brouillon",
+        "pending_approval": "En attente d'approbation",
+        "active": "Actif",
+        "expired": "Expiré",
+        "cancelled": "Annulé"
+      }
+    },
+    "tickets": {
+      "title": "Tickets de service",
+      "description": "Gérer les demandes de support client",
+      "addTicket": "Ajouter un ticket",
+      "editTicket": "Modifier le ticket",
+      "ticketNumber": "N° de ticket",
+      "ticketTitle": "Titre",
+      "priority": "Priorité",
+      "status": "Statut",
+      "category": "Catégorie",
+      "resolution": "Résolution",
+      "noTickets": "Aucun ticket trouvé",
+      "priorities": {
+        "low": "Basse",
+        "medium": "Moyenne",
+        "high": "Haute",
+        "critical": "Critique"
+      },
+      "statuses": {
+        "open": "Ouvert",
+        "in_progress": "En cours",
+        "waiting_on_customer": "En attente du client",
+        "resolved": "Résolu",
+        "closed": "Fermé"
+      }
     }
   }
 }

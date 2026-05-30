@@ -11,3 +11,5 @@ Thumbs.db
 
 # Env
 .env.local
+
+crm/node_modules
