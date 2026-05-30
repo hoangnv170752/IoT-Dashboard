@@ -13,3 +13,7 @@ Thumbs.db
 .env.local
 
 crm/node_modules
+crm/scripts/explore-db.ts
+.env
+.env.*
+!.env.example
