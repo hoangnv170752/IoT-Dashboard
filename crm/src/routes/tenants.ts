@@ -2,6 +2,9 @@ import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
 import { authenticate, requireSysAdmin } from '../middleware/auth.js';
 import { TenantStatus, Prisma } from '../generated/prisma';
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 12;
 
 interface TenantBody {
   name: string;
@@ -23,15 +26,179 @@ interface PaginationQuery {
   status?: TenantStatus;
 }
 
+interface TenantRegistrationBody {
+  tenantName: string;
+  slug: string;
+  domain?: string;
+  adminEmail: string;
+  adminPassword: string;
+  adminFirstName: string;
+  adminLastName: string;
+  adminPhone?: string;
+  companyName?: string;
+  companyIndustry?: string;
+  companyWebsite?: string;
+}
+
+interface ApprovalBody {
+  action: 'approve' | 'reject';
+  reason?: string;
+  planCode?: string;
+}
+
 export async function tenantRoutes(fastify: FastifyInstance) {
-  // All routes require SysAdmin
-  fastify.addHook('preHandler', authenticate);
-  fastify.addHook('preHandler', requireSysAdmin);
+  // =====================
+  // PUBLIC ROUTES (No auth required)
+  // =====================
+
+  // POST /tenants/register - Self-registration for new tenants
+  fastify.post<{ Body: TenantRegistrationBody }>(
+    '/tenants/register',
+    {
+      schema: {
+        tags: ['Tenants'],
+        summary: 'Register new tenant',
+        description: 'Self-registration for new tenants. Creates tenant with pending status awaiting approval.',
+        body: {
+          type: 'object',
+          required: ['tenantName', 'slug', 'adminEmail', 'adminPassword', 'adminFirstName', 'adminLastName'],
+          properties: {
+            tenantName: { type: 'string', minLength: 2, maxLength: 100 },
+            slug: { type: 'string', pattern: '^[a-z0-9-]+$', minLength: 2, maxLength: 50 },
+            domain: { type: 'string' },
+            adminEmail: { type: 'string', format: 'email' },
+            adminPassword: { type: 'string', minLength: 8 },
+            adminFirstName: { type: 'string', minLength: 1 },
+            adminLastName: { type: 'string', minLength: 1 },
+            adminPhone: { type: 'string' },
+            companyName: { type: 'string' },
+            companyIndustry: { type: 'string' },
+            companyWebsite: { type: 'string' },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const {
+        tenantName,
+        slug,
+        domain,
+        adminEmail,
+        adminPassword,
+        adminFirstName,
+        adminLastName,
+        adminPhone,
+        companyName,
+        companyIndustry,
+        companyWebsite,
+      } = request.body;
+
+      // Check if slug is unique
+      const existingTenant = await prisma.tenant.findUnique({
+        where: { slug },
+      });
+
+      if (existingTenant) {
+        return reply.status(400).send({ error: 'This organization slug is already taken' });
+      }
+
+      // Check if email is unique
+      const existingUser = await prisma.user.findUnique({
+        where: { email: adminEmail },
+      });
+
+      if (existingUser) {
+        return reply.status(400).send({ error: 'This email is already registered' });
+      }
+
+      // Hash password
+      const passwordHash = await bcrypt.hash(adminPassword, SALT_ROUNDS);
+
+      // Create tenant with pending status
+      const tenant = await prisma.tenant.create({
+        data: {
+          name: tenantName,
+          slug,
+          domain,
+          status: 'pending',
+        },
+      });
+
+      // Create tenant admin user (pending until tenant approved)
+      await prisma.user.create({
+        data: {
+          email: adminEmail,
+          passwordHash,
+          firstName: adminFirstName,
+          lastName: adminLastName,
+          phone: adminPhone,
+          role: 'tenant_admin',
+          status: 'pending',
+          tenantId: tenant.id,
+        },
+      });
+
+      // Create company if provided
+      if (companyName) {
+        await prisma.company.create({
+          data: {
+            name: companyName,
+            industry: companyIndustry,
+            website: companyWebsite,
+            tenantId: tenant.id,
+          },
+        });
+      }
+
+      return reply.status(201).send({
+        message: 'Registration submitted successfully. Please wait for admin approval.',
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+        status: tenant.status,
+      });
+    }
+  );
+
+  // GET /tenants/check-slug/:slug - Check if slug is available
+  fastify.get<{ Params: { slug: string } }>(
+    '/tenants/check-slug/:slug',
+    {
+      schema: {
+        tags: ['Tenants'],
+        summary: 'Check slug availability',
+        description: 'Check if a tenant slug is available for registration',
+        params: {
+          type: 'object',
+          properties: {
+            slug: { type: 'string' },
+          },
+          required: ['slug'],
+        },
+      },
+    },
+    async (request, reply) => {
+      const { slug } = request.params;
+
+      const existing = await prisma.tenant.findUnique({
+        where: { slug },
+      });
+
+      return reply.send({
+        slug,
+        available: !existing,
+      });
+    }
+  );
+
+  // =====================
+  // PROTECTED ROUTES (SysAdmin only)
+  // =====================
 
   // GET /tenants - List all tenants
   fastify.get<{ Querystring: PaginationQuery }>(
     '/tenants',
     {
+      preHandler: [authenticate, requireSysAdmin],
       schema: {
         tags: ['Tenants'],
         summary: 'List all tenants',
@@ -75,6 +242,16 @@ export async function tenantRoutes(fastify: FastifyInstance) {
           take: limit,
           orderBy: { createdAt: 'desc' },
           include: {
+            users: {
+              where: { role: 'tenant_admin' },
+              take: 1,
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
             _count: {
               select: {
                 users: true,
@@ -95,9 +272,11 @@ export async function tenantRoutes(fastify: FastifyInstance) {
       return reply.send({
         data: data.map((tenant) => ({
           ...tenant,
+          adminUser: tenant.users[0] || null,
           usersCount: tenant._count.users,
           companiesCount: tenant._count.companies,
           devicesCount: tenant._count.deviceAssignments,
+          users: undefined,
           _count: undefined,
         })),
         total,
@@ -108,10 +287,196 @@ export async function tenantRoutes(fastify: FastifyInstance) {
     }
   );
 
+  // GET /tenants/pending - List pending tenants
+  fastify.get<{ Querystring: { page?: number; limit?: number } }>(
+    '/tenants/pending',
+    {
+      preHandler: [authenticate, requireSysAdmin],
+      schema: {
+        tags: ['Tenants'],
+        summary: 'List pending tenants',
+        description: 'Get a list of tenants waiting for approval',
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    async (request, reply) => {
+      const page = Number(request.query.page) || 1;
+      const limit = Number(request.query.limit) || 20;
+      const skip = (page - 1) * limit;
+
+      const where = { status: 'pending' as TenantStatus };
+
+      const [data, total] = await Promise.all([
+        prisma.tenant.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'asc' },
+          include: {
+            users: {
+              where: { role: 'tenant_admin' },
+              take: 1,
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                phone: true,
+              },
+            },
+            companies: {
+              take: 1,
+              select: {
+                id: true,
+                name: true,
+                industry: true,
+                website: true,
+              },
+            },
+          },
+        }),
+        prisma.tenant.count({ where }),
+      ]);
+
+      return reply.send({
+        data: data.map((tenant) => ({
+          ...tenant,
+          adminUser: tenant.users[0] || null,
+          company: tenant.companies[0] || null,
+          users: undefined,
+          companies: undefined,
+        })),
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      });
+    }
+  );
+
+  // POST /tenants/:id/approve - Approve or reject tenant
+  fastify.post<{ Params: TenantParams; Body: ApprovalBody }>(
+    '/tenants/:id/approve',
+    {
+      preHandler: [authenticate, requireSysAdmin],
+      schema: {
+        tags: ['Tenants'],
+        summary: 'Approve or reject tenant',
+        description: 'Approve or reject a pending tenant registration',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+          },
+          required: ['id'],
+        },
+        body: {
+          type: 'object',
+          required: ['action'],
+          properties: {
+            action: { type: 'string', enum: ['approve', 'reject'] },
+            reason: { type: 'string' },
+            planCode: { type: 'string', description: 'Plan code to assign (default: free)' },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params;
+      const { action, reason, planCode = 'free' } = request.body;
+
+      const tenant = await prisma.tenant.findUnique({
+        where: { id },
+        include: {
+          users: { where: { role: 'tenant_admin' } },
+        },
+      });
+
+      if (!tenant) {
+        return reply.status(404).send({ error: 'Tenant not found' });
+      }
+
+      if (tenant.status !== 'pending') {
+        return reply.status(400).send({ error: 'Tenant is not pending approval' });
+      }
+
+      if (action === 'approve') {
+        // Get plan
+        const plan = await prisma.plan.findUnique({
+          where: { code: planCode },
+        });
+
+        if (!plan) {
+          return reply.status(400).send({ error: 'Invalid plan code' });
+        }
+
+        // Update tenant status
+        await prisma.tenant.update({
+          where: { id },
+          data: { status: 'active' },
+        });
+
+        // Activate all tenant users
+        await prisma.user.updateMany({
+          where: { tenantId: id },
+          data: { status: 'active' },
+        });
+
+        // Create subscription
+        await prisma.subscription.create({
+          data: {
+            tenantId: id,
+            planId: plan.id,
+            billingCycle: 'monthly',
+            status: 'active',
+            startDate: new Date(),
+          },
+        });
+
+        return reply.send({
+          message: 'Tenant approved successfully',
+          tenant: {
+            id: tenant.id,
+            name: tenant.name,
+            status: 'active',
+            plan: plan.name,
+          },
+        });
+      } else {
+        // Reject - set status to cancelled
+        await prisma.tenant.update({
+          where: { id },
+          data: {
+            status: 'cancelled',
+            settings: { rejectionReason: reason },
+          },
+        });
+
+        // Deactivate all tenant users
+        await prisma.user.updateMany({
+          where: { tenantId: id },
+          data: { status: 'inactive' },
+        });
+
+        return reply.send({
+          message: 'Tenant rejected',
+          tenant: {
+            id: tenant.id,
+            name: tenant.name,
+            status: 'cancelled',
+            reason,
+          },
+        });
+      }
+    }
+  );
+
   // GET /tenants/:id - Get tenant by ID
   fastify.get<{ Params: TenantParams }>(
     '/tenants/:id',
     {
+      preHandler: [authenticate, requireSysAdmin],
       schema: {
         tags: ['Tenants'],
         summary: 'Get tenant by ID',
@@ -130,6 +495,17 @@ export async function tenantRoutes(fastify: FastifyInstance) {
       const tenant = await prisma.tenant.findUnique({
         where: { id: request.params.id },
         include: {
+          users: {
+            where: { role: 'tenant_admin' },
+            take: 1,
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+            },
+          },
           subscription: {
             include: {
               plan: true,
@@ -160,6 +536,7 @@ export async function tenantRoutes(fastify: FastifyInstance) {
 
       return reply.send({
         ...tenant,
+        adminUser: tenant.users[0] || null,
         stats: {
           users: tenant._count.users,
           companies: tenant._count.companies,
@@ -170,19 +547,21 @@ export async function tenantRoutes(fastify: FastifyInstance) {
           assets: tenant._count.assetAssignments,
           chatSessions: tenant._count.chatSessions,
         },
+        users: undefined,
         _count: undefined,
       });
     }
   );
 
-  // POST /tenants - Create tenant
-  fastify.post<{ Body: TenantBody }>(
+  // POST /tenants - Create tenant (by SysAdmin)
+  fastify.post<{ Body: TenantBody & { adminEmail?: string; adminPassword?: string; adminFirstName?: string; adminLastName?: string } }>(
     '/tenants',
     {
+      preHandler: [authenticate, requireSysAdmin],
       schema: {
         tags: ['Tenants'],
         summary: 'Create tenant',
-        description: 'Create a new tenant manually (SysAdmin only)',
+        description: 'Create a new tenant manually (SysAdmin only). Optionally create admin user.',
         security: [{ bearerAuth: [] }],
         body: {
           type: 'object',
@@ -194,12 +573,16 @@ export async function tenantRoutes(fastify: FastifyInstance) {
             logo: { type: 'string' },
             primaryColor: { type: 'string' },
             settings: { type: 'object' },
+            adminEmail: { type: 'string', format: 'email' },
+            adminPassword: { type: 'string', minLength: 8 },
+            adminFirstName: { type: 'string' },
+            adminLastName: { type: 'string' },
           },
         },
       },
     },
     async (request, reply) => {
-      const { name, slug, domain, logo, primaryColor, settings } = request.body;
+      const { name, slug, domain, logo, primaryColor, settings, adminEmail, adminPassword, adminFirstName, adminLastName } = request.body;
 
       // Check if slug is unique
       const existing = await prisma.tenant.findUnique({
@@ -210,6 +593,17 @@ export async function tenantRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({ error: 'Slug already exists' });
       }
 
+      // Check admin email if provided
+      if (adminEmail) {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: adminEmail },
+        });
+        if (existingUser) {
+          return reply.status(400).send({ error: 'Admin email already exists' });
+        }
+      }
+
+      // Create tenant with active status (created by SysAdmin)
       const tenant = await prisma.tenant.create({
         data: {
           name,
@@ -222,6 +616,40 @@ export async function tenantRoutes(fastify: FastifyInstance) {
         },
       });
 
+      // Create admin user if credentials provided
+      if (adminEmail && adminPassword && adminFirstName && adminLastName) {
+        const passwordHash = await bcrypt.hash(adminPassword, SALT_ROUNDS);
+        await prisma.user.create({
+          data: {
+            email: adminEmail,
+            passwordHash,
+            firstName: adminFirstName,
+            lastName: adminLastName,
+            role: 'tenant_admin',
+            status: 'active',
+            emailVerified: true,
+            tenantId: tenant.id,
+          },
+        });
+      }
+
+      // Create free subscription
+      const freePlan = await prisma.plan.findUnique({
+        where: { code: 'free' },
+      });
+
+      if (freePlan) {
+        await prisma.subscription.create({
+          data: {
+            tenantId: tenant.id,
+            planId: freePlan.id,
+            billingCycle: 'monthly',
+            status: 'active',
+            startDate: new Date(),
+          },
+        });
+      }
+
       return reply.status(201).send(tenant);
     }
   );
@@ -230,6 +658,7 @@ export async function tenantRoutes(fastify: FastifyInstance) {
   fastify.put<{ Params: TenantParams; Body: Partial<TenantBody> & { status?: TenantStatus } }>(
     '/tenants/:id',
     {
+      preHandler: [authenticate, requireSysAdmin],
       schema: {
         tags: ['Tenants'],
         summary: 'Update tenant',
@@ -288,6 +717,7 @@ export async function tenantRoutes(fastify: FastifyInstance) {
   fastify.delete<{ Params: TenantParams }>(
     '/tenants/:id',
     {
+      preHandler: [authenticate, requireSysAdmin],
       schema: {
         tags: ['Tenants'],
         summary: 'Delete tenant',
@@ -311,10 +741,16 @@ export async function tenantRoutes(fastify: FastifyInstance) {
         return reply.status(404).send({ error: 'Tenant not found' });
       }
 
-      // Soft delete by setting status to cancelled
+      // Soft delete
       await prisma.tenant.update({
         where: { id: request.params.id },
         data: { status: 'cancelled' },
+      });
+
+      // Deactivate all users
+      await prisma.user.updateMany({
+        where: { tenantId: request.params.id },
+        data: { status: 'inactive' },
       });
 
       return reply.status(204).send();
@@ -325,6 +761,7 @@ export async function tenantRoutes(fastify: FastifyInstance) {
   fastify.get<{ Params: TenantParams }>(
     '/tenants/:id/stats',
     {
+      preHandler: [authenticate, requireSysAdmin],
       schema: {
         tags: ['Tenants'],
         summary: 'Get tenant stats',
@@ -353,7 +790,6 @@ export async function tenantRoutes(fastify: FastifyInstance) {
         return reply.status(404).send({ error: 'Tenant not found' });
       }
 
-      // Get counts
       const [
         usersCount,
         companiesCount,
@@ -408,12 +844,7 @@ export async function tenantRoutes(fastify: FastifyInstance) {
       return reply.send({
         tenantId: tenant.id,
         tenantName: tenant.name,
-        plan: plan
-          ? {
-              name: plan.name,
-              code: plan.code,
-            }
-          : null,
+        plan: plan ? { name: plan.name, code: plan.code } : null,
         subscriptionStatus: tenant.subscription?.status ?? null,
         counts: {
           users: usersCount,

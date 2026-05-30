@@ -33,8 +33,10 @@
     "crm": {
       "title": "CRM",
       "dashboard": "Panel",
+      "tenants": "Inquilinos",
       "companies": "Empresas",
       "contacts": "Contactos",
+      "products": "Productos",
       "deals": "Negocios",
       "vendors": "Proveedores",
       "contracts": "Contratos",

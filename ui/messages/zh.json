@@ -33,8 +33,10 @@
     "crm": {
       "title": "客户关系",
       "dashboard": "仪表盘",
+      "tenants": "租户",
       "companies": "公司",
       "contacts": "联系人",
+      "products": "产品",
       "deals": "交易",
       "vendors": "供应商",
       "contracts": "合同",

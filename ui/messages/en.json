@@ -33,8 +33,10 @@
     "crm": {
       "title": "CRM",
       "dashboard": "Dashboard",
+      "tenants": "Tenants",
       "companies": "Companies",
       "contacts": "Contacts",
+      "products": "Products",
       "deals": "Deals",
       "vendors": "Vendors",
       "contracts": "Contracts",

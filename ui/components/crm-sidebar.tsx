@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Building2, Users, HandCoins, Truck, FileText, TicketCheck } from "lucide-react";
+import { LayoutDashboard, Building2, Users, HandCoins, Truck, FileText, TicketCheck, Package, Shield } from "lucide-react";
+import { useCrmAuth } from "@/contexts/crm-auth-context";
 
 interface NavItem {
   titleKey: string;
   href: string;
   icon: React.ReactNode;
+  sysAdminOnly?: boolean;
 }
 
 const crmNavItems: NavItem[] = [
@@ -17,6 +19,12 @@ const crmNavItems: NavItem[] = [
     titleKey: "nav.crm.dashboard",
     href: "/crm",
     icon: <LayoutDashboard className="h-4 w-4" />,
+  },
+  {
+    titleKey: "nav.crm.tenants",
+    href: "/crm/tenants",
+    icon: <Shield className="h-4 w-4" />,
+    sysAdminOnly: true,
   },
   {
     titleKey: "nav.crm.companies",
@@ -27,6 +35,11 @@ const crmNavItems: NavItem[] = [
     titleKey: "nav.crm.contacts",
     href: "/crm/contacts",
     icon: <Users className="h-4 w-4" />,
+  },
+  {
+    titleKey: "nav.crm.products",
+    href: "/crm/products",
+    icon: <Package className="h-4 w-4" />,
   },
   {
     titleKey: "nav.crm.deals",
@@ -84,6 +97,14 @@ interface CrmSidebarProps {
 
 export function CrmSidebar({ collapsed = false }: CrmSidebarProps) {
   const t = useTranslations();
+  const { user } = useCrmAuth();
+
+  const isSysAdmin = user?.role === "sys_admin";
+
+  // Filter nav items based on role
+  const filteredNavItems = crmNavItems.filter(
+    (item) => !item.sysAdminOnly || isSysAdmin
+  );
 
   return (
     <aside
@@ -114,7 +135,7 @@ export function CrmSidebar({ collapsed = false }: CrmSidebarProps) {
           collapsed ? "px-2" : "px-3"
         )}
       >
-        {crmNavItems.map((item) => (
+        {filteredNavItems.map((item) => (
           <NavLink
             key={item.href}
             item={item}

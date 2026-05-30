@@ -48,7 +48,7 @@ async function bootstrap() {
 
   // Rate limiting
   await fastify.register(rateLimit, {
-    max: 100,
+    max: 500,
     timeWindow: '1 minute',
   });
 
