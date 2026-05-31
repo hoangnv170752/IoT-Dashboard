@@ -231,7 +231,7 @@ export default function AuditLogsPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Select value={resourceFilter} onValueChange={setResourceFilter}>
+                <Select value={resourceFilter} onValueChange={(v) => v !== null && setResourceFilter(v)}>
                   <SelectTrigger className="w-[150px]">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Resource" />
@@ -245,7 +245,7 @@ export default function AuditLogsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={actionFilter} onValueChange={setActionFilter}>
+                <Select value={actionFilter} onValueChange={(v) => v !== null && setActionFilter(v)}>
                   <SelectTrigger className="w-[130px]">
                     <SelectValue placeholder="Action" />
                   </SelectTrigger>
