@@ -40,7 +40,9 @@
       "deals": "Affaires",
       "vendors": "Fournisseurs",
       "contracts": "Contrats",
-      "tickets": "Tickets"
+      "tickets": "Tickets",
+      "auditLogs": "Journaux d'audit",
+      "settings": "Paramètres"
     }
   },
   "auth": {

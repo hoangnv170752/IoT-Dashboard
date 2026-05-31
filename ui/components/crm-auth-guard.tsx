@@ -1,35 +1,36 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useCrmAuth } from "@/contexts/crm-auth-context";
 import { Loader2 } from "lucide-react";
+
+const emptySubscribe = () => () => {};
+function useHasMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,  
+    () => false  
+  );
+}
 
 interface CrmAuthGuardProps {
   children: React.ReactNode;
 }
 
 export function CrmAuthGuard({ children }: CrmAuthGuardProps) {
-  const { isLoggedIn, isLoading } = useCrmAuth();
+  const { isLoggedIn } = useCrmAuth();
   const router = useRouter();
+  const hasMounted = useHasMounted();
 
   useEffect(() => {
-    if (!isLoading && !isLoggedIn) {
+    if (hasMounted && !isLoggedIn) {
       router.push("/crm-signin");
     }
-  }, [isLoading, isLoggedIn, router]);
+  }, [hasMounted, isLoggedIn, router]);
 
-  // Show loading spinner while checking auth
-  if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  // Don't render children if not logged in
-  if (!isLoggedIn) {
+  // Before mount or if not logged in, show spinner
+  if (!hasMounted || !isLoggedIn) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

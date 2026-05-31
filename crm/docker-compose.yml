@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  crm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - THINGSBOARD_URL=${THINGSBOARD_URL:-https://iot.eaut.edu.vn/api}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-turbo}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - crm-network
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-crm}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-crm_password}
+      - POSTGRES_DB=${POSTGRES_DB:-crm_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crm} -d ${POSTGRES_DB:-crm_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - crm-network
+
+volumes:
+  postgres_data:
+
+networks:
+  crm-network:
+    driver: bridge

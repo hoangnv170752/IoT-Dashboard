@@ -25,9 +25,95 @@ A unified platform for monitoring industrial automation systems and managing con
 - Industrial automation engineers
 - Operations & maintenance departments
 
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           Frontend (Next.js)                            │
+│  ┌─────────────────────────────┐    ┌─────────────────────────────┐    │
+│  │      IoT Dashboard          │    │       CRM Portal            │    │
+│  │  - Device monitoring        │    │  - Tenant management        │    │
+│  │  - Asset management         │    │  - Company/Contact CRM      │    │
+│  │  - Real-time telemetry      │    │  - Deals & Contracts        │    │
+│  │  - ThingsBoard auth         │    │  - Products catalog         │    │
+│  └─────────────┬───────────────┘    └─────────────┬───────────────┘    │
+│                │                                  │                     │
+└────────────────┼──────────────────────────────────┼─────────────────────┘
+                 │                                  │
+                 ▼                                  ▼
+┌────────────────────────────────┐    ┌────────────────────────────────┐
+│      ThingsBoard Backend       │    │        CRM Backend             │
+│  - Device management           │    │  - Multi-tenant architecture   │
+│  - MQTT/HTTP connectivity      │    │  - RBAC (4 user levels)        │
+│  - Telemetry storage           │    │  - Subscription/billing        │
+│  - Rule engine                 │    │  - PostgreSQL + Prisma         │
+└────────────────────────────────┘    └────────────────────────────────┘
+```
+
+## CRM Module
+
+The CRM module provides enterprise-grade customer relationship management with multi-tenancy support.
+
+### Features
+
+- **Multi-Tenant Architecture** - Isolated data per organization with tenant-scoped access
+- **Role-Based Access Control (RBAC)** - 4 user levels: SysAdmin, Tenant Admin, Tenant User, Customer User
+- **Self-Service Registration** - Organizations can register and await admin approval
+- **Subscription Plans** - Free, Starter, Professional, Enterprise tiers with usage limits
+
+### CRM Entities
+
+| Entity | Description |
+|--------|-------------|
+| **Tenants** | Organizations/companies using the platform |
+| **Companies** | Customer companies within a tenant |
+| **Contacts** | People associated with companies |
+| **Products** | Product/device catalog for sales |
+| **Deals** | Sales pipeline with stages (lead → closed) |
+| **Vendors** | Supplier management |
+| **Contracts** | Service agreements with companies/vendors |
+| **Tickets** | Service/support ticket management |
+
+### User Roles
+
+| Role | Access Level |
+|------|-------------|
+| `sys_admin` | Full platform access, tenant management, plan management |
+| `tenant_admin` | Full access within their tenant, user management |
+| `tenant_user` | CRUD on tenant data, no admin functions |
+| `customer_user` | Read-only access to assigned data |
+
+## Project Structure
+
+```
+IoT-Dashboard/
+├── ui/                     # Next.js frontend (IoT + CRM)
+│   ├── app/
+│   │   ├── (auth)/         # IoT authentication pages
+│   │   ├── (dashboard)/    # IoT dashboard pages
+│   │   ├── (crm-auth)/     # CRM authentication pages
+│   │   └── (crm-dashboard)/ # CRM dashboard pages
+│   ├── components/         # React components
+│   ├── contexts/           # Auth contexts (IoT + CRM)
+│   ├── lib/                # API services
+│   └── messages/           # i18n translations (en, zh, fr, es)
+│
+├── crm/                    # CRM Backend (Fastify + Prisma)
+│   ├── src/
+│   │   ├── routes/         # API endpoints
+│   │   ├── middleware/     # Auth, RBAC middleware
+│   │   └── services/       # Business logic
+│   ├── prisma/             # Database schema
+│   └── scripts/            # Migration scripts
+│
+├── firmware/               # ESP-IDF firmware for IoT devices
+├── android/                # Android companion app
+└── README.md
+```
+
 ## Quick Start
 
-### Dashboard UI
+### Dashboard UI (IoT Platform)
 ```bash
 cd ui
 npm install
@@ -35,7 +121,38 @@ cp .env.example .env  # Configure NEXT_PUBLIC_API_URL
 npm run dev
 ```
 
+Access at `http://localhost:3000` - Login with ThingsBoard credentials.
+
 See [ui/README.md](ui/README.md) for detailed technical documentation.
+
+### CRM Backend
+```bash
+cd crm
+pnpm install
+cp .env.example .env  # Configure DATABASE_URL and JWT_SECRET
+pnpm prisma generate
+pnpm prisma db push
+npx tsx scripts/migrate-to-multitenancy.ts  # Create SysAdmin and seed data
+pnpm dev
+```
+
+API available at `http://localhost:5001/api` - Swagger docs at `/docs`.
+
+### CRM Portal (Frontend)
+
+The CRM portal is integrated into the UI and accessible at:
+- `/crm-signin` - CRM login page
+- `/crm-register` - Organization registration
+- `/crm/*` - CRM dashboard (requires CRM authentication)
+
+Add to `ui/.env`:
+```env
+NEXT_PUBLIC_CRM_API_URL=http://localhost:5001/api
+```
+
+**Default Credentials (after migration):**
+- SysAdmin: `admin@iot-crm.local` / `ChangeMe123!`
+- Tenant Admin: `tenant-admin@default.local` / `TenantAdmin123!`
 
 ### Firmware
 ```bash

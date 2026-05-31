@@ -40,7 +40,9 @@
       "deals": "Deals",
       "vendors": "Vendors",
       "contracts": "Contracts",
-      "tickets": "Tickets"
+      "tickets": "Tickets",
+      "auditLogs": "Audit Logs",
+      "settings": "Settings"
     }
   },
   "auth": {

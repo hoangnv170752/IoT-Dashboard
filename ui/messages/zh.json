@@ -40,7 +40,9 @@
       "deals": "交易",
       "vendors": "供应商",
       "contracts": "合同",
-      "tickets": "工单"
+      "tickets": "工单",
+      "auditLogs": "审计日志",
+      "settings": "设置"
     }
   },
   "auth": {

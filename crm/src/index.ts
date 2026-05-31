@@ -29,6 +29,7 @@ import { contractRoutes } from './routes/contracts.js';
 import { billingRoutes } from './routes/billing.js';
 import { notificationRoutes } from './routes/notifications.js';
 import { messagingRoutes } from './routes/messaging.js';
+import { auditLogRoutes } from './routes/audit-logs.js';
 
 // Services
 import { prisma } from './services/prisma.js';
@@ -426,6 +427,9 @@ Enterprise CRM REST API for IoT Dashboard with:
 
   // Direct Messaging Routes
   await fastify.register(messagingRoutes, { prefix: '/api' });
+
+  // Audit Logs Routes
+  await fastify.register(auditLogRoutes, { prefix: '/api' });
 
   // Health check
   fastify.get('/health', {

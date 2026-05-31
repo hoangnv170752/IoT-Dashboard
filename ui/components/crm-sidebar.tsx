@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Building2, Users, HandCoins, Truck, FileText, TicketCheck, Package, Shield } from "lucide-react";
+import { LayoutDashboard, Building2, Users, HandCoins, Truck, FileText, TicketCheck, Package, Shield, Settings, History } from "lucide-react";
 import { useCrmAuth } from "@/contexts/crm-auth-context";
 
 interface NavItem {
@@ -60,6 +60,17 @@ const crmNavItems: NavItem[] = [
     titleKey: "nav.crm.tickets",
     href: "/crm/tickets",
     icon: <TicketCheck className="h-4 w-4" />,
+  },
+  {
+    titleKey: "nav.crm.auditLogs",
+    href: "/crm/audit-logs",
+    icon: <History className="h-4 w-4" />,
+    sysAdminOnly: true,
+  },
+  {
+    titleKey: "nav.crm.settings",
+    href: "/crm/settings",
+    icon: <Settings className="h-4 w-4" />,
   },
 ];
 

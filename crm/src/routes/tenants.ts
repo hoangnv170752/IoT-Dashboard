@@ -124,7 +124,7 @@ export async function tenantRoutes(fastify: FastifyInstance) {
         },
       });
 
-      // Create tenant admin user (pending until tenant approved)
+      // Create tenant admin user (pending_verification until tenant approved)
       await prisma.user.create({
         data: {
           email: adminEmail,
@@ -133,7 +133,7 @@ export async function tenantRoutes(fastify: FastifyInstance) {
           lastName: adminLastName,
           phone: adminPhone,
           role: 'tenant_admin',
-          status: 'pending',
+          status: 'pending_verification',
           tenantId: tenant.id,
         },
       });

@@ -40,7 +40,9 @@
       "deals": "Negocios",
       "vendors": "Proveedores",
       "contracts": "Contratos",
-      "tickets": "Tickets"
+      "tickets": "Tickets",
+      "auditLogs": "Registros de auditoría",
+      "settings": "Configuración"
     }
   },
   "auth": {

@@ -171,6 +171,51 @@ export async function validateSysAdminLogin(
   return user;
 }
 
+export interface LoginResult {
+  user: User | null;
+  error?: 'invalid_credentials' | 'user_inactive' | 'tenant_suspended' | 'tenant_cancelled';
+}
+
+export async function validateUserLogin(
+  email: string,
+  password: string
+): Promise<LoginResult> {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { tenant: true },
+  });
+
+  if (!user || !user.passwordHash) {
+    return { user: null, error: 'invalid_credentials' };
+  }
+
+  if (user.status !== 'active') {
+    return { user: null, error: 'user_inactive' };
+  }
+
+  // Check tenant status (skip for sys_admin who has no tenant)
+  if (user.tenant) {
+    if (user.tenant.status === 'suspended') {
+      return { user: null, error: 'tenant_suspended' };
+    }
+    if (user.tenant.status === 'cancelled') {
+      return { user: null, error: 'tenant_cancelled' };
+    }
+  }
+
+  const isValid = await verifyPassword(password, user.passwordHash);
+  if (!isValid) {
+    return { user: null, error: 'invalid_credentials' };
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  });
+
+  return { user };
+}
+
 // Create SysAdmin user (for initial setup)
 export async function createSysAdmin(
   email: string,

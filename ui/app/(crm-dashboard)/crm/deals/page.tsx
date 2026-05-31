@@ -429,7 +429,7 @@ export default function DealsPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label>Currency</Label>
-                  <Select value={formCurrency} onValueChange={setFormCurrency}>
+                  <Select value={formCurrency} onValueChange={(v) => v && setFormCurrency(v)}>
                     <SelectTrigger>
                       <span>{formCurrency}</span>
                     </SelectTrigger>
@@ -445,7 +445,7 @@ export default function DealsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <Label>{t("crm.deals.stage")}</Label>
-                <Select value={formStage} onValueChange={setFormStage}>
+                <Select value={formStage} onValueChange={(v) => v && setFormStage(v)}>
                   <SelectTrigger>
                     <span>{t(`crm.deals.stages.${formStage}`)}</span>
                   </SelectTrigger>
@@ -486,7 +486,7 @@ export default function DealsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <Label>{t("crm.deals.company")}</Label>
-                <Select value={formCompanyId} onValueChange={setFormCompanyId}>
+                <Select value={formCompanyId} onValueChange={(v) => v && setFormCompanyId(v)}>
                   <SelectTrigger>
                     <span>
                       {formCompanyId
@@ -507,7 +507,7 @@ export default function DealsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <Label>{t("crm.deals.contact")}</Label>
-                <Select value={formContactId} onValueChange={setFormContactId}>
+                <Select value={formContactId} onValueChange={(v) => v && setFormContactId(v)}>
                   <SelectTrigger>
                     <span>
                       {formContactId

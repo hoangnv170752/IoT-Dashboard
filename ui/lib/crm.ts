@@ -23,7 +23,7 @@ export function removeCrmToken(): void {
 }
 
 // Common fetch wrapper with auth
-async function crmFetch<T>(
+export async function crmFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {

@@ -41,7 +41,8 @@ export function CrmHeader({ sidebarOpen, onToggleSidebar }: CrmHeaderProps) {
 
   const handleLanguageChange = (newLocale: string | null) => {
     if (!newLocale) return;
-    document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=31536000`;
+    // Use "locale" cookie name to match root layout
+    document.cookie = `locale=${newLocale};path=/;max-age=31536000`;
     window.location.href = pathname;
   };
 
