@@ -483,7 +483,7 @@ export default function ProductsPage() {
                   <Select
                     value={formData.category}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, category: value })
+                      value && setFormData({ ...formData, category: value })
                     }
                   >
                     <SelectTrigger>
@@ -503,7 +503,7 @@ export default function ProductsPage() {
                   <Select
                     value={formData.status}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, status: value as ProductStatus })
+                      value && setFormData({ ...formData, status: value as ProductStatus })
                     }
                   >
                     <SelectTrigger>
@@ -539,7 +539,7 @@ export default function ProductsPage() {
                   <Select
                     value={formData.currency}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, currency: value })
+                      value && setFormData({ ...formData, currency: value })
                     }
                   >
                     <SelectTrigger>
