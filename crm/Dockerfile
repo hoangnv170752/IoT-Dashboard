@@ -7,10 +7,10 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci
+RUN npm install
 
 # Copy prisma schema
 COPY prisma ./prisma/
@@ -38,10 +38,10 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 crm
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json ./
 
 # Install production dependencies only
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy prisma schema and generate client
 COPY prisma ./prisma/
