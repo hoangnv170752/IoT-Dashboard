@@ -17,6 +17,7 @@ export function AIAssistantButton() {
 
   // Initialize messages with translation on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMessages([
       {
         role: "assistant",

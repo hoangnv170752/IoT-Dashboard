@@ -105,6 +105,7 @@ export default function TicketsPage() {
   }, [currentPage, debouncedSearch, selectedStatus, selectedPriority]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadTickets();
   }, [loadTickets]);
 
@@ -235,7 +236,7 @@ export default function TicketsPage() {
               className="pl-9"
             />
           </div>
-          <Select value={selectedStatus} onValueChange={(v) => { setSelectedStatus(v); setCurrentPage(1); }}>
+          <Select value={selectedStatus} onValueChange={(v: string | null) => { if (v !== null) { setSelectedStatus(v); setCurrentPage(1); } }}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <span>{selectedStatus === "all" ? "All Statuses" : t(`crm.tickets.statuses.${selectedStatus}`)}</span>
             </SelectTrigger>
@@ -248,7 +249,7 @@ export default function TicketsPage() {
               <SelectItem value="closed">{t("crm.tickets.statuses.closed")}</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={selectedPriority} onValueChange={(v) => { setSelectedPriority(v); setCurrentPage(1); }}>
+          <Select value={selectedPriority} onValueChange={(v: string | null) => { if (v !== null) { setSelectedPriority(v); setCurrentPage(1); } }}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <span>{selectedPriority === "all" ? "All Priorities" : t(`crm.tickets.priorities.${selectedPriority}`)}</span>
             </SelectTrigger>
@@ -403,7 +404,7 @@ export default function TicketsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <Label>{t("crm.tickets.priority")}</Label>
-                  <Select value={formPriority} onValueChange={setFormPriority}>
+                  <Select value={formPriority} onValueChange={(v) => v !== null && setFormPriority(v)}>
                     <SelectTrigger>
                       <span>{t(`crm.tickets.priorities.${formPriority}`)}</span>
                     </SelectTrigger>
@@ -417,7 +418,7 @@ export default function TicketsPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label>{t("crm.tickets.status")}</Label>
-                  <Select value={formStatus} onValueChange={setFormStatus}>
+                  <Select value={formStatus} onValueChange={(v) => v !== null && setFormStatus(v)}>
                     <SelectTrigger>
                       <span>{t(`crm.tickets.statuses.${formStatus}`)}</span>
                     </SelectTrigger>

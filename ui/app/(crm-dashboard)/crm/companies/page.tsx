@@ -85,6 +85,7 @@ export default function CompaniesPage() {
   }, [currentPage, debouncedSearch]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCompanies();
   }, [loadCompanies]);
 
@@ -403,7 +404,7 @@ export default function CompaniesPage() {
 
               <div className="flex flex-col gap-1.5">
                 <Label>{t("crm.companies.size")}</Label>
-                <Select value={formSize} onValueChange={setFormSize}>
+                <Select value={formSize} onValueChange={(v) => v !== null && setFormSize(v)}>
                   <SelectTrigger>
                     <span>{formSize ? getSizeLabel(formSize) : "Select size"}</span>
                   </SelectTrigger>

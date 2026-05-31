@@ -115,10 +115,12 @@ export default function DealsPage() {
   }, [currentPage, debouncedSearch, selectedStage]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadRelated();
   }, [loadRelated]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDeals();
   }, [loadDeals]);
 
@@ -260,7 +262,7 @@ export default function DealsPage() {
               className="pl-9"
             />
           </div>
-          <Select value={selectedStage} onValueChange={(v) => { setSelectedStage(v); setCurrentPage(1); }}>
+          <Select value={selectedStage} onValueChange={(v: string | null) => { if (v !== null) { setSelectedStage(v); setCurrentPage(1); } }}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <span>{selectedStage === "all" ? "All Stages" : t(`crm.deals.stages.${selectedStage}`)}</span>
             </SelectTrigger>

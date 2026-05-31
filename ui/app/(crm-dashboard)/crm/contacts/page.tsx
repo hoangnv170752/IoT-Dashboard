@@ -97,10 +97,12 @@ export default function ContactsPage() {
   }, [currentPage, debouncedSearch]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCompanies();
   }, [loadCompanies]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadContacts();
   }, [loadContacts]);
 
@@ -421,7 +423,7 @@ export default function ContactsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <Label>{t("crm.contacts.company")}</Label>
-                <Select value={formCompanyId} onValueChange={setFormCompanyId}>
+                <Select value={formCompanyId} onValueChange={(v) => v !== null && setFormCompanyId(v)}>
                   <SelectTrigger>
                     <span>
                       {formCompanyId

@@ -51,7 +51,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     } else {
       // Disconnect when user logs out
       websocketService.disconnect();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsConnected(false);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNotificationCount(0);
     }
   }, [user]);

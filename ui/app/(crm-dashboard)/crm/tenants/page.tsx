@@ -582,7 +582,7 @@ export default function TenantsPage() {
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(v) => v !== null && setStatusFilter(v)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -864,7 +864,7 @@ export default function TenantsPage() {
             {approvalAction === "approve" ? (
               <div className="space-y-2">
                 <Label>Assign Plan</Label>
-                <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                <Select value={selectedPlan} onValueChange={(v) => v !== null && setSelectedPlan(v)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

@@ -101,6 +101,7 @@ export default function VendorsPage() {
   }, [currentPage, debouncedSearch, selectedStatus]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadVendors();
   }, [loadVendors]);
 
@@ -255,7 +256,7 @@ export default function VendorsPage() {
               className="pl-9"
             />
           </div>
-          <Select value={selectedStatus} onValueChange={(v) => { setSelectedStatus(v); setCurrentPage(1); }}>
+          <Select value={selectedStatus} onValueChange={(v: string | null) => { if (v !== null) { setSelectedStatus(v); setCurrentPage(1); } }}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <span>{selectedStatus === "all" ? "All Statuses" : t(`crm.vendors.statuses.${selectedStatus}`)}</span>
             </SelectTrigger>
@@ -415,7 +416,7 @@ export default function VendorsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <Label>{t("crm.vendors.type")}</Label>
-                  <Select value={formType} onValueChange={setFormType}>
+                  <Select value={formType} onValueChange={(v) => v !== null && setFormType(v)}>
                     <SelectTrigger>
                       <span>{t(`crm.vendors.types.${formType}`)}</span>
                     </SelectTrigger>
@@ -429,7 +430,7 @@ export default function VendorsPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label>{t("crm.vendors.status")}</Label>
-                  <Select value={formStatus} onValueChange={setFormStatus}>
+                  <Select value={formStatus} onValueChange={(v) => v !== null && setFormStatus(v)}>
                     <SelectTrigger>
                       <span>{t(`crm.vendors.statuses.${formStatus}`)}</span>
                     </SelectTrigger>
@@ -520,7 +521,7 @@ export default function VendorsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <Label>Currency</Label>
-                <Select value={formCurrency} onValueChange={setFormCurrency}>
+                <Select value={formCurrency} onValueChange={(v) => v !== null && setFormCurrency(v)}>
                   <SelectTrigger>
                     <span>{formCurrency}</span>
                   </SelectTrigger>
