@@ -22,9 +22,6 @@ import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -113,21 +110,6 @@ export default function AuditLogsPage() {
 
   const limit = 20;
 
-  // Check if user is SysAdmin
-  if (user?.role !== "sys_admin") {
-    return (
-      <div className="p-4 md:p-6">
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <Shield className="h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold">Access Denied</h2>
-          <p className="text-muted-foreground mt-2">
-            Only System Administrators can view audit logs.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   useEffect(() => {
     async function loadLogs() {
       setIsLoading(true);
@@ -191,6 +173,21 @@ export default function AuditLogsPage() {
   });
 
   const uniqueResources = [...new Set(logs.map((l) => l.resource))];
+
+  // Check if user is SysAdmin (after all hooks)
+  if (user?.role !== "sys_admin") {
+    return (
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <Shield className="h-12 w-12 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold">Access Denied</h2>
+          <p className="text-muted-foreground mt-2">
+            Only System Administrators can view audit logs.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6">
@@ -383,7 +380,7 @@ export default function AuditLogsPage() {
                           </td>
                           <td className="px-4 py-3">
                             <Dialog>
-                              <DialogTrigger asChild>
+                              <DialogTrigger>
                                 <Button
                                   variant="ghost"
                                   size="sm"
