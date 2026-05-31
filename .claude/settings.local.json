@@ -15,7 +15,10 @@
       "Bash(pnpm exec prisma db push:*)",
       "Bash(pnpm exec tsc:*)",
       "Bash(pnpm remove:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)"
     ]
   }
 }

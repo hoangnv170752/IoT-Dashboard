@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
-import { FeedbackType, FeedbackStatus } from '../generated/prisma';
+import { FeedbackType, FeedbackStatus } from '@prisma/client';
 import { authenticate, requireRole, requireSysAdmin } from '../middleware/auth.js';
 
 interface FeedbackBody {

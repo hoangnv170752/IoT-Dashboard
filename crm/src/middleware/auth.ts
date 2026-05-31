@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import { JwtPayload, hasPermission } from '../services/auth.js';
-import { UserRole } from '../generated/prisma';
+import { UserRole } from '@prisma/client';
 
 // Extend Fastify types
 declare module '@fastify/jwt' {

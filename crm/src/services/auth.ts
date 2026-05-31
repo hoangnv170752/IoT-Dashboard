@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { prisma } from './prisma.js';
-import { User, UserRole, Tenant } from '../generated/prisma';
+import { User, UserRole, Tenant } from '@prisma/client';
 
 const SALT_ROUNDS = 12;
 const THINGSBOARD_URL = process.env.THINGSBOARD_URL || 'https://iot.eaut.edu.vn/api';

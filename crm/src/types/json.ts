@@ -1,4 +1,4 @@
-import { Prisma } from '../generated/prisma';
+import { Prisma } from '@prisma/client';
 
 // Helper to convert Record<string, unknown> to Prisma's InputJsonValue
 export function toJsonValue(value: Record<string, unknown> | undefined): Prisma.InputJsonValue | undefined {

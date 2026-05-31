@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
 import { authenticate, requireTenantAdmin, withTenantScope } from '../middleware/auth.js';
-import { ContractType, ContractStatusEnum, Prisma } from '../generated/prisma';
+import { ContractType, ContractStatusEnum, Prisma } from '@prisma/client';
 
 interface ContractBody {
   contractNumber: string;

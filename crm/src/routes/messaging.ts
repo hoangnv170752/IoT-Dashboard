@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { prisma } from '../services/prisma.js';
 import { authenticate } from '../middleware/auth.js';
-import type { Prisma } from '../generated/prisma';
+import type { Prisma } from '@prisma/client';
 
 interface ConversationParams {
   id: string;

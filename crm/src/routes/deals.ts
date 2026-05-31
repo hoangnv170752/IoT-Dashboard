@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
-import { DealStage } from '../generated/prisma';
+import { DealStage } from '@prisma/client';
 import { authenticate, withTenantScope, requireRole } from '../middleware/auth.js';
 
 interface DealBody {

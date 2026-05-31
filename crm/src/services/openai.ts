@@ -3,7 +3,7 @@ import { WebSocket } from 'ws';
 import { prisma } from './prisma.js';
 import { onMessage, getSocketUser, subscribe } from './websocket.js';
 import { JwtPayload } from './auth.js';
-import { Prisma } from '../generated/prisma';
+import { Prisma } from '@prisma/client';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

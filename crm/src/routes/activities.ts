@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
-import { ActivityType } from '../generated/prisma';
+import { ActivityType } from '@prisma/client';
 import { authenticate, requireRole } from '../middleware/auth.js';
 
 interface ActivityBody {

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
-import type { Prisma } from '../generated/prisma';
+import type { Prisma } from '@prisma/client';
 import { authenticate, withTenantScope } from '../middleware/auth.js';
 
 interface ChatSessionBody {

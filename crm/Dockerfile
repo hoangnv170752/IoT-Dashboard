@@ -15,7 +15,7 @@ RUN npm install
 # Copy prisma schema
 COPY prisma ./prisma/
 
-# Generate Prisma client (outputs to src/generated/prisma)
+# Generate Prisma client (outputs to node_modules/@prisma/client)
 RUN npx prisma generate
 
 # Copy source code
@@ -24,9 +24,6 @@ COPY src ./src/
 
 # Build TypeScript
 RUN npm run build
-
-# Copy generated prisma to dist folder (since imports are relative)
-RUN cp -r src/generated dist/
 
 # Production stage
 FROM node:20-alpine AS production
@@ -46,10 +43,11 @@ COPY package.json ./
 # Install production dependencies only
 RUN npm install --omit=dev
 
-# Copy prisma schema (needed for migrations)
+# Copy prisma schema and generate client
 COPY prisma ./prisma/
+RUN npx prisma generate
 
-# Copy built files from builder (includes generated prisma client)
+# Copy built files from builder
 COPY --from=builder /app/dist ./dist/
 
 # Set ownership

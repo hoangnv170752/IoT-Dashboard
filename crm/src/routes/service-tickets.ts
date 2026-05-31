@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
-import { TicketPriority, TicketStatus } from '../generated/prisma';
+import { TicketPriority, TicketStatus } from '@prisma/client';
 import { authenticate, withTenantScope, requireRole } from '../middleware/auth.js';
 
 interface ServiceTicketBody {

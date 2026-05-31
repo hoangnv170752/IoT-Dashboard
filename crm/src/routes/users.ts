@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
 import { hashPassword } from '../services/auth.js';
 import { authenticate, requireTenantAdmin, withTenantScope } from '../middleware/auth.js';
-import { UserRole, UserStatus, Prisma } from '../generated/prisma';
+import { UserRole, UserStatus, Prisma } from '@prisma/client';
 
 interface UserBody {
   email: string;

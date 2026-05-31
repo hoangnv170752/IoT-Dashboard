@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
 import { authenticate, requireSysAdmin } from '../middleware/auth.js';
-import { TenantStatus, Prisma } from '../generated/prisma';
+import { TenantStatus, Prisma } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const SALT_ROUNDS = 12;

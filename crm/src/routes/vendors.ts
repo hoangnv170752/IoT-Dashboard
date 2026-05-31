@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
 import { authenticate, requireTenantAdmin, withTenantScope } from '../middleware/auth.js';
-import { VendorType, VendorStatus } from '../generated/prisma';
+import { VendorType, VendorStatus } from '@prisma/client';
 
 interface VendorBody {
   name: string;

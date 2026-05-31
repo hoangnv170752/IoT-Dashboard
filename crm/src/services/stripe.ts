@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import { prisma } from './prisma.js';
-import { SubscriptionStatus, BillingCycle } from '../generated/prisma';
+import { SubscriptionStatus, BillingCycle } from '@prisma/client';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 

@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../services/prisma.js';
 import { authenticate, requireTenantAdmin, withTenantScope } from '../middleware/auth.js';
-import { ItemStatus, Prisma } from '../generated/prisma';
+import { ItemStatus, Prisma } from '@prisma/client';
 
 interface ItemBody {
   sku: string;

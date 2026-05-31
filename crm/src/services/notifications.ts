@@ -1,6 +1,6 @@
 import { prisma } from './prisma.js';
 import { sendToUser, sendToTenant } from './websocket.js';
-import { NotificationType, Prisma } from '../generated/prisma';
+import { NotificationType, Prisma } from '@prisma/client';
 
 interface CreateNotificationParams {
   userId: string;
